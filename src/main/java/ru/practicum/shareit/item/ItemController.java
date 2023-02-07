@@ -52,7 +52,7 @@ public class ItemController {
     @GetMapping("/search")
     public List<ItemDto> search(@RequestParam (value = "text") String text, HttpServletRequest request) {
         log.info("Получен {} запрос {} поиск {}", request.getMethod(), request.getRequestURI(), text);
-        if(text.isBlank()) {
+        if (text.isBlank()) {
             return new ArrayList<>();
         }
         return itemService.search(text);
