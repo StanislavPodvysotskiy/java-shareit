@@ -1,9 +1,12 @@
-package ru.practicum.shareit.item.model;
+package ru.practicum.shareit.user.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 /**
@@ -12,20 +15,21 @@ import java.util.Objects;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Item {
+public class User {
 
     private Integer id;
-    private Integer ownerId;
+    @NotNull
     private String name;
-    private String description;
-    private Boolean available;
+    @NotNull
+    @Email
+    private String email;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Item item = (Item) o;
-        return Objects.equals(id, item.id);
+        User user = (User) o;
+        return Objects.equals(id, user.id);
     }
 
     @Override
