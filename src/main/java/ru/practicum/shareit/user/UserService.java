@@ -9,9 +9,13 @@ import java.util.List;
 public interface UserService {
 
     List<User> getAll();
+
     User getById(Integer userId);
+
     User save(User user);
+
     User update(UserDto userDto, Integer userId);
+
     void delete(Integer id);
 
 }

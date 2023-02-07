@@ -32,7 +32,7 @@ public class ExceptionHandler {
     @org.springframework.web.bind.annotation.ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ResponseEntity<String> handleBadRequestException(ConstraintViolationException ex){
+    public ResponseEntity<String> handleBadRequestException(ConstraintViolationException ex) {
         log.info("400 {}", ex.getMessage());
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }

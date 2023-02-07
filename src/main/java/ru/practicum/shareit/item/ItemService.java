@@ -7,10 +7,15 @@ import java.util.List;
 public interface ItemService {
 
     List<ItemDto> getAll(Integer ownerId);
+
     ItemDto getById(Integer itemId, Integer ownerId);
+
     ItemDto save(ItemDto itemDto, Integer ownerId);
+
     ItemDto update(ItemDto itemDto, Integer itemId, Integer ownerId);
+
     List<ItemDto> search(String text);
+
     void delete(Integer itemId);
 
 }

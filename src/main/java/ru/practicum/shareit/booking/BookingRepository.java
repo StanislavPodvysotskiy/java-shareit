@@ -7,7 +7,10 @@ import java.util.Collection;
 public interface BookingRepository {
 
     Collection<Booking> getAll();
+
     Booking create(Booking booking);
+
     Booking update(Booking booking);
+
     void delete(Booking id);
 }
