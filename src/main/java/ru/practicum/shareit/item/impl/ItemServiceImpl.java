@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.ItemService;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserService;
 
 import java.util.List;
@@ -17,28 +17,28 @@ public class ItemServiceImpl implements ItemService {
     private final UserService userService;
 
     @Override
-    public List<ItemDto> getAll(Integer ownerId) {
+    public List<Item> getAll(Integer ownerId) {
         return itemRepository.getAll(ownerId);
     }
 
     @Override
-    public ItemDto getById(Integer itemId, Integer ownerId) {
+    public Item getById(Integer itemId, Integer ownerId) {
         return itemRepository.getById(itemId, ownerId);
     }
 
     @Override
-    public ItemDto save(ItemDto itemDto, Integer ownerId) {
+    public Item save(Item item, Integer ownerId) {
         userService.getById(ownerId);
-        return itemRepository.save(itemDto, ownerId);
+        return itemRepository.save(item, ownerId);
     }
 
     @Override
-    public ItemDto update(ItemDto itemDto, Integer itemId, Integer ownerId) {
-        return itemRepository.update(itemDto, itemId, ownerId);
+    public Item update(Item item, Integer itemId, Integer ownerId) {
+        return itemRepository.update(item, itemId, ownerId);
     }
 
     @Override
-    public List<ItemDto> search(String text) {
+    public List<Item> search(String text) {
         return itemRepository.search(text);
     }
 

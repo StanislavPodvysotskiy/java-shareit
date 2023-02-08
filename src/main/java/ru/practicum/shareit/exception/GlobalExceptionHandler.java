@@ -11,7 +11,7 @@ import javax.validation.ConstraintViolationException;
 
 @Slf4j
 @RestControllerAdvice
-public class ExceptionHandler {
+public class GlobalExceptionHandler {
 
     @org.springframework.web.bind.annotation.ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)

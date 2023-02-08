@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.UserService;
-import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
@@ -31,8 +30,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User update(UserDto userDto, Integer userId) {
-        return userRepository.update(userDto, userId);
+    public User update(User user, Integer userId) {
+        return userRepository.update(user, userId);
     }
 
     @Override

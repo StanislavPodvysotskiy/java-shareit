@@ -1,15 +1,18 @@
 package ru.practicum.shareit.item;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ItemMapper {
 
     public static Item makeItem(Item item, ItemDto itemDto) {
-        if (itemDto.getName() != null) {
+        if (itemDto.getName() != null && !itemDto.getName().isBlank()) {
             item.setName(itemDto.getName());
         }
-        if (itemDto.getDescription() != null) {
+        if (itemDto.getDescription() != null && !itemDto.getDescription().isBlank()) {
             item.setDescription(itemDto.getDescription());
         }
         if (itemDto.getAvailable() != null) {

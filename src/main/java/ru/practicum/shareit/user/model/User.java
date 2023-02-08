@@ -4,23 +4,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Getter
 @Setter
 @NoArgsConstructor
 public class User {
 
     private Integer id;
-    @NotNull
     private String name;
-    @NotNull
-    @Email
     private String email;
 
     @Override

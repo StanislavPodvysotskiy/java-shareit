@@ -3,9 +3,7 @@ package ru.practicum.shareit.user.impl;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.AlreadyExistException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.UserRepository;
-import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.*;
@@ -23,44 +21,52 @@ public class UserRepositoryInMemory implements UserRepository {
 
     @Override
     public User getById(Integer userId) {
-        if (!userMap.containsKey(userId)) {
-            throw new NotFoundException("User");
-        }
+        checkUserById(userId);
         return userMap.get(userId);
     }
 
     @Override
     public User save(User user) {
-        for (User u : userMap.values()) {
-            if (u.getEmail().equals(user.getEmail())) {
-                throw new AlreadyExistException("User");
-            }
-        }
+        checkUserByEmail(user.getEmail());
         user.setId(id++);
         userMap.put(user.getId(), user);
         return user;
     }
 
     @Override
-    public User update(UserDto userDto, Integer userId) {
-        if (!userMap.containsKey(userId)) {
-            throw new NotFoundException("User");
-        }
+    public User update(User user, Integer userId) {
+        checkUserById(userId);
         for (User u : userMap.values()) {
-            if (u.getEmail().equals(userDto.getEmail()) && !Objects.equals(u.getId(), userId)) {
+            if (u.getEmail().equals(user.getEmail()) && !Objects.equals(u.getId(), userId)) {
                 throw new AlreadyExistException("User with email " + u.getEmail());
             }
         }
-        User user = UserMapper.makeUser(userMap.get(userId), userDto, userId);
-        userMap.put(userId, user);
-        return user;
+        if (user.getName() != null && !user.getName().isBlank()) {
+            userMap.get(userId).setName(user.getName());
+        }
+        if (user.getEmail() != null && !user.getEmail().isBlank()) {
+            userMap.get(userId).setEmail(user.getEmail());
+        }
+        return userMap.get(userId);
     }
 
     @Override
     public void delete(Integer id) {
+        checkUserById(id);
+        userMap.remove(id);
+    }
+
+    private void checkUserById(Integer id) {
         if (!userMap.containsKey(id)) {
             throw new NotFoundException("User");
         }
-        userMap.remove(id);
+    }
+
+    private void checkUserByEmail(String email) {
+        for (User u : userMap.values()) {
+            if (u.getEmail().equals(email)) {
+                throw new AlreadyExistException("User");
+            }
+        }
     }
 }

@@ -1,75 +1,66 @@
 package ru.practicum.shareit.item.impl;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.ItemRepository;
-import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-@RequiredArgsConstructor
 public class ItemRepositoryInMemory implements ItemRepository {
 
     private Integer id = 1;
     private final Map<Integer, Item> itemsMap = new HashMap<>();
+    private final Map<Integer, Map<Integer, Item>> userItemIndex = new HashMap<>();
 
     @Override
-    public List<ItemDto> getAll(Integer ownerId) {
-        List<ItemDto> itemList = new ArrayList<>();
-        for (Item item : itemsMap.values()) {
-            if (item.getOwnerId().equals(ownerId)) {
-                itemList.add(ItemMapper.makeItemDto(item));
-            }
-        }
-        return itemList;
+    public List<Item> getAll(Integer ownerId) {
+        return new ArrayList<>(userItemIndex.get(ownerId).values());
     }
 
     @Override
-    public ItemDto getById(Integer itemId, Integer ownerId) {
+    public Item getById(Integer itemId, Integer ownerId) {
         if (!itemsMap.containsKey(itemId)) {
             throw new NotFoundException("Item");
         }
-        return ItemMapper.makeItemDto(itemsMap.get(itemId));
+        return itemsMap.get(itemId);
     }
 
     @Override
-    public ItemDto save(ItemDto itemDto, Integer ownerId) {
-        Item item = ItemMapper.makeItem(new Item(), itemDto);
+    public Item save(Item item, Integer ownerId) {
         item.setId(id++);
         item.setOwnerId(ownerId);
         itemsMap.put(item.getId(), item);
-        return ItemMapper.makeItemDto(item);
+        userItemIndex.put(ownerId, Map.of(item.getId(), itemsMap.get(item.getId())));
+        return item;
     }
 
     @Override
-    public ItemDto update(ItemDto itemDto, Integer itemId, Integer ownerId) {
+    public Item update(Item item, Integer itemId, Integer ownerId) {
         if (!itemsMap.containsKey(itemId)) {
             throw new NotFoundException("Item");
         }
-        for (Item i : itemsMap.values()) {
-            if (i.getId().equals(itemId) && !Objects.equals(i.getOwnerId(), ownerId)) {
-                throw new NotFoundException("Item owner");
-            }
+        if (!Objects.equals(itemsMap.get(itemId).getOwnerId(), ownerId)) {
+            throw new NotFoundException("Item owner");
         }
-        Item item = ItemMapper.makeItem(itemsMap.get(itemId), itemDto);
-        itemsMap.put(item.getId(), item);
-        return ItemMapper.makeItemDto(item);
+        if (item.getName() != null && !item.getName().isBlank()) {
+            itemsMap.get(itemId).setName(item.getName());
+        }
+        if (item.getDescription() != null && !item.getDescription().isBlank()) {
+            itemsMap.get(itemId).setDescription(item.getDescription());
+        }
+        if (item.getAvailable() != null) {
+            itemsMap.get(itemId).setAvailable(item.getAvailable());
+        }
+        return itemsMap.get(itemId);
     }
 
     @Override
-    public List<ItemDto> search(String text) {
-        List<Item> items = itemsMap.values().stream().filter(i -> i.getDescription().toLowerCase()
-                        .contains(text.toLowerCase()) && i.getAvailable().equals(true)).collect(Collectors.toList());
-        List<ItemDto> itemsDto = new ArrayList<>();
-        for (Item item : items) {
-            itemsDto.add(ItemMapper.makeItemDto(item));
-        }
-        return itemsDto;
+    public List<Item> search(String text) {
+        return itemsMap.values().stream().filter(i -> i.getDescription().toLowerCase()
+                .contains(text.toLowerCase()) && i.getAvailable().equals(true)).collect(Collectors.toList());
     }
 
     @Override

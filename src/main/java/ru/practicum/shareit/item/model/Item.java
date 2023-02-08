@@ -6,9 +6,6 @@ import lombok.Setter;
 
 import java.util.Objects;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Getter
 @Setter
 @NoArgsConstructor
