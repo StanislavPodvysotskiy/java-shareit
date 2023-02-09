@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ResponseEntity<String> MethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+    public ResponseEntity<String> methodArgumentNotValidException(MethodArgumentNotValidException ex) {
         log.info("400 {}", ex.getMessage());
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
