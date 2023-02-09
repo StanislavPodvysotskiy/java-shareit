@@ -8,7 +8,6 @@ import ru.practicum.shareit.item.model.Item;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -24,11 +23,7 @@ public class ItemController {
     public List<ItemDto> getAll(@RequestHeader(value = "X-Sharer-User-Id") Integer ownerId,
                                 HttpServletRequest request) {
         log.info("Получен {} запрос {}", request.getMethod(), request.getRequestURI());
-        List<ItemDto> itemList = new ArrayList<>();
-        for (Item item : itemService.getAll(ownerId)) {
-            itemList.add(ItemMapper.makeItemDto(item));
-        }
-        return itemList;
+        return ItemMapper.makeListItemDto(itemService.getAll(ownerId));
     }
 
     @GetMapping("/{itemId}")
@@ -42,14 +37,14 @@ public class ItemController {
     public ItemDto save(@RequestHeader(value = "X-Sharer-User-Id") Integer ownerId,
                         @RequestBody @Valid ItemDto itemDto, HttpServletRequest request) {
         log.info("Получен {} запрос {}", request.getMethod(), request.getRequestURI());
-        return ItemMapper.makeItemDto(itemService.save(ItemMapper.makeItem(new Item(), itemDto), ownerId));
+        return ItemMapper.makeItemDto(itemService.save(ItemMapper.makeItem(itemDto), ownerId));
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto update(@RequestHeader(value = "X-Sharer-User-Id") Integer ownerId,
                           @PathVariable Integer itemId, @RequestBody ItemDto itemDto, HttpServletRequest request) {
         log.info("Получен {} запрос {}", request.getMethod(), request.getRequestURI());
-        return ItemMapper.makeItemDto(itemService.update(ItemMapper.makeItem(new Item(), itemDto), itemId, ownerId));
+        return ItemMapper.makeItemDto(itemService.update(ItemMapper.makeItem(itemDto), itemId, ownerId));
     }
 
     @GetMapping("/search")
@@ -58,11 +53,7 @@ public class ItemController {
         if (text.isBlank()) {
             return Collections.emptyList();
         }
-        List<ItemDto> itemsDto = new ArrayList<>();
-        for (Item item : itemService.search(text)) {
-            itemsDto.add(ItemMapper.makeItemDto(item));
-        }
-        return itemsDto;
+        return ItemMapper.makeListItemDto(itemService.search(text));
     }
 
     @DeleteMapping("/{itemId}")

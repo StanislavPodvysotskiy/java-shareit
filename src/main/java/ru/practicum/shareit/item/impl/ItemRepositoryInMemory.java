@@ -42,19 +42,20 @@ public class ItemRepositoryInMemory implements ItemRepository {
         if (!itemsMap.containsKey(itemId)) {
             throw new NotFoundException("Item");
         }
-        if (!Objects.equals(itemsMap.get(itemId).getOwnerId(), ownerId)) {
+        Item savedItem = itemsMap.get(itemId);
+        if (!Objects.equals(savedItem.getOwnerId(), ownerId)) {
             throw new NotFoundException("Item owner");
         }
         if (item.getName() != null && !item.getName().isBlank()) {
-            itemsMap.get(itemId).setName(item.getName());
+            savedItem.setName(item.getName());
         }
         if (item.getDescription() != null && !item.getDescription().isBlank()) {
-            itemsMap.get(itemId).setDescription(item.getDescription());
+            savedItem.setDescription(item.getDescription());
         }
         if (item.getAvailable() != null) {
-            itemsMap.get(itemId).setAvailable(item.getAvailable());
+            savedItem.setAvailable(item.getAvailable());
         }
-        return itemsMap.get(itemId);
+        return savedItem;
     }
 
     @Override
@@ -68,6 +69,7 @@ public class ItemRepositoryInMemory implements ItemRepository {
         if (!itemsMap.containsKey(itemId)) {
             throw new NotFoundException("Item");
         }
+        userItemIndex.get(itemsMap.get(itemId).getOwnerId()).remove(itemId);
         itemsMap.remove(itemId);
     }
 

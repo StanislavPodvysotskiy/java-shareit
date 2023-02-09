@@ -6,10 +6,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.utility.Create;
+import ru.practicum.shareit.utility.Update;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -23,11 +23,7 @@ public class UserController {
     @GetMapping
     public List<UserDto> getAll(HttpServletRequest request) {
         log.info("Получен {} запрос {}", request.getMethod(), request.getRequestURI());
-        List<UserDto> usersDto = new ArrayList<>();
-        for (User u : userService.getAll()) {
-            usersDto.add(UserMapper.makeUserDto(u));
-        }
-        return usersDto;
+        return UserMapper.makeUserDtoList(userService.getAll());
     }
 
     @GetMapping("/{userId}")
@@ -39,14 +35,14 @@ public class UserController {
     @PostMapping
     public UserDto save(@RequestBody @Validated(Create.class) UserDto userDto, HttpServletRequest request) {
         log.info("Получен {} запрос {}", request.getMethod(), request.getRequestURI());
-        return UserMapper.makeUserDto(userService.save(UserMapper.makeUser(new User(), userDto)));
+        return UserMapper.makeUserDto(userService.save(UserMapper.makeUser(userDto)));
     }
 
     @PatchMapping("/{userId}")
-    public UserDto update(@RequestBody @Valid UserDto userDto,
+    public UserDto update(@RequestBody @Validated(Update.class) UserDto userDto,
                           @PathVariable Integer userId, HttpServletRequest request) {
         log.info("Получен {} запрос {}", request.getMethod(), request.getRequestURI());
-        return UserMapper.makeUserDto(userService.update(UserMapper.makeUser(new User(), userDto), userId));
+        return UserMapper.makeUserDto(userService.update(UserMapper.makeUser(userDto), userId));
     }
 
     @DeleteMapping("/{userId}")

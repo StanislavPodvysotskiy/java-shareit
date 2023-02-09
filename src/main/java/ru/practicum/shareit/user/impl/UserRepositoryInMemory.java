@@ -41,13 +41,14 @@ public class UserRepositoryInMemory implements UserRepository {
                 throw new AlreadyExistException("User with email " + u.getEmail());
             }
         }
+        User savedUser = userMap.get(userId);
         if (user.getName() != null && !user.getName().isBlank()) {
-            userMap.get(userId).setName(user.getName());
+            savedUser.setName(user.getName());
         }
         if (user.getEmail() != null && !user.getEmail().isBlank()) {
-            userMap.get(userId).setEmail(user.getEmail());
+            savedUser.setEmail(user.getEmail());
         }
-        return userMap.get(userId);
+        return savedUser;
     }
 
     @Override
