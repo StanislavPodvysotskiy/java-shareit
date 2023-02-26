@@ -1,19 +1,13 @@
 package ru.practicum.shareit.user;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.List;
+public interface UserRepository extends JpaRepository<User, Integer> {
 
-public interface UserRepository {
-
-    List<User> getAll();
-
-    User getById(Integer userId);
-
-    User save(User user);
-
-    User update(User user, Integer userId);
-
-    void delete(Integer id);
+    @Override
+    @Query("select u from User u where u.id = ?1")
+    User getById(Integer id);
 
 }

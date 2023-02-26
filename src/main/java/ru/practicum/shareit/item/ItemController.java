@@ -3,12 +3,16 @@ package ru.practicum.shareit.item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.Comment;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/items")
@@ -22,28 +26,37 @@ public class ItemController {
     public List<ItemDto> getAll(@RequestHeader(value = "X-Sharer-User-Id") Integer ownerId,
                                 HttpServletRequest request) {
         log.info("Получен {} запрос {}", request.getMethod(), request.getRequestURI());
-        return ItemMapper.makeListItemDto(itemService.getAll(ownerId));
+        return itemService.getAll(ownerId)
+                .stream().sorted(Comparator.comparing(ItemDto::getId)).collect(Collectors.toList());
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getById(@RequestHeader(value = "X-Sharer-User-Id") Integer ownerId,
+    public ItemDto getById(@RequestHeader(value = "X-Sharer-User-Id") Integer userId,
                            @PathVariable Integer itemId, HttpServletRequest request) {
         log.info("Получен {} запрос {}", request.getMethod(), request.getRequestURI());
-        return ItemMapper.makeItemDto(itemService.getById(itemId, ownerId));
+        return itemService.getById(itemId, userId);
     }
 
     @PostMapping
     public ItemDto save(@RequestHeader(value = "X-Sharer-User-Id") Integer ownerId,
                         @RequestBody @Valid ItemDto itemDto, HttpServletRequest request) {
         log.info("Получен {} запрос {}", request.getMethod(), request.getRequestURI());
-        return ItemMapper.makeItemDto(itemService.save(ItemMapper.makeItem(itemDto), ownerId));
+        return itemService.save(itemDto, ownerId);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto update(@RequestHeader(value = "X-Sharer-User-Id") Integer ownerId,
                           @PathVariable Integer itemId, @RequestBody ItemDto itemDto, HttpServletRequest request) {
         log.info("Получен {} запрос {}", request.getMethod(), request.getRequestURI());
-        return ItemMapper.makeItemDto(itemService.update(ItemMapper.makeItem(itemDto), itemId, ownerId));
+        return itemService.update(itemDto, itemId, ownerId);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public Comment saveComment(@RequestHeader(value = "X-Sharer-User-Id") Integer userId,
+                               @PathVariable Integer itemId, @RequestBody @Valid CommentDto commentDto,
+                               HttpServletRequest request) {
+        log.info("Получен {} запрос {}", request.getMethod(), request.getRequestURI());
+        return itemService.saveComment(commentDto, itemId, userId);
     }
 
     @GetMapping("/search")
@@ -52,7 +65,7 @@ public class ItemController {
         if (text.isBlank()) {
             return Collections.emptyList();
         }
-        return ItemMapper.makeListItemDto(itemService.search(text));
+        return itemService.search(text);
     }
 
     @DeleteMapping("/{itemId}")
