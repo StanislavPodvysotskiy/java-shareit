@@ -87,7 +87,7 @@ public class BookingServiceImpl implements BookingService {
         }
         User booker = userRepository.getById(bookerId);
         User owner = userRepository.getById(item.getOwner().getId());
-        if (booker == null || owner ==null) {
+        if (booker == null || owner == null) {
             throw new NotFoundException("User");
         }
         if (Objects.equals(owner.getId(), bookerId)) {

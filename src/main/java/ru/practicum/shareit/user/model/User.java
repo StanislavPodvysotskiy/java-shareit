@@ -3,10 +3,8 @@ package ru.practicum.shareit.user.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.practicum.shareit.booking.model.Booking;
 
 import javax.persistence.*;
-import java.util.List;
 import java.util.Objects;
 
 @Entity
