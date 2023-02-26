@@ -10,7 +10,7 @@ import java.util.List;
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
     @Override
-    @Query("select b from Booking b where b.Id = ?1")
+    @Query("select b from Booking b where b.id = ?1")
     Booking getById(Integer id);
 
     List<Booking> findByBookerId(Integer bookerId);
