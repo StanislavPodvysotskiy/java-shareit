@@ -34,7 +34,7 @@ public class UserController {
     @PostMapping
     public UserDto save(@RequestBody @Validated(Create.class) UserDto userDto, HttpServletRequest request) {
         log.info("Получен {} запрос {}", request.getMethod(), request.getRequestURI());
-        return UserMapper.makeUserDto(userService.save(UserMapper.makeUser(userDto)));
+        return userService.save(userDto);
     }
 
     @PatchMapping("/{userId}")

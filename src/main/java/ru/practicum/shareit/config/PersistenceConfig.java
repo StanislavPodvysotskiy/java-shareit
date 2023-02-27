@@ -1,3 +1,4 @@
+/*
 package ru.practicum.shareit.config;
 
 import org.springframework.context.annotation.Bean;
@@ -59,4 +60,4 @@ public class PersistenceConfig {
         return transactionManager;
     }
 
-}
+}*/
