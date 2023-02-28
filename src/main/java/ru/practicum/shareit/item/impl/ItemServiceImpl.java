@@ -130,7 +130,9 @@ public class ItemServiceImpl implements ItemService {
 
     private void setPastAndFutureBooking(ItemDto itemDto, Integer userId) {
         List<LastBooking> pastBooking = bookingRepository.findPastBooking(LocalDateTime.now(), userId)
-                .stream().filter(booking -> booking.getItem().getId().equals(itemDto.getId())).map(booking -> {
+                .stream().filter(booking -> booking.getItem().getId().equals(itemDto.getId()))
+                .filter(booking -> !booking.getStatus().equals("REJECTED"))
+                .map(booking -> {
                     LastBooking lastBooking = new LastBooking();
                     lastBooking.setId(booking.getId());
                     lastBooking.setBookerId(booking.getBooker().getId());
@@ -139,7 +141,7 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
         List<NextBooking> futureBooking = bookingRepository.findFutureBooking(LocalDateTime.now(), userId)
                 .stream().filter(booking -> booking.getItem().getId().equals(itemDto.getId()))
-                .filter(booking -> !booking.getStatus().equals("REJECTED"))
+                .filter(booking -> booking.getStatus().equals("APPROVED"))
                 .map(booking -> {
                     NextBooking nextBooking = new NextBooking();
                     nextBooking.setId(booking.getId());
@@ -150,7 +152,7 @@ public class ItemServiceImpl implements ItemService {
             itemDto.setLastBooking(pastBooking.get(0));
         }
         if (!futureBooking.isEmpty()) {
-            itemDto.setNextBooking(futureBooking.get(0));
+            itemDto.setNextBooking(futureBooking.get(futureBooking.size()-1));
         }
     }
 }

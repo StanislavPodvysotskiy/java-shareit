@@ -25,7 +25,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     @Query("select b from Booking b where b.end < ?1 and b.booker.id = ?2 or b.end < ?1 and b.item.owner.id = ?2")
     List<Booking> findPastBooking(LocalDateTime localDateTime, Integer bookerId);
 
-    @Query("select b from Booking b where b.end >= ?1 and b.booker.id = ?2 or b.end >= ?1 and b.item.owner.id = ?2")
+    @Query("select b from Booking b where b.start > ?1 and b.booker.id = ?2 or b.start > ?1 and b.item.owner.id = ?2")
     List<Booking> findFutureBooking(LocalDateTime localDateTime, Integer bookerId);
 
     @Query("select b from Booking b where b.status = ?1 and b.booker.id = ?2 or b.status = ?1 and b.item.owner.id = ?2")
