@@ -152,7 +152,7 @@ public class ItemServiceImpl implements ItemService {
             itemDto.setLastBooking(pastBooking.get(0));
         }
         if (!futureBooking.isEmpty()) {
-            itemDto.setNextBooking(futureBooking.get(futureBooking.size()-1));
+            itemDto.setNextBooking(futureBooking.get(futureBooking.size() - 1));
         }
     }
 }
