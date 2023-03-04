@@ -166,7 +166,7 @@ public class ItemServiceImpl implements ItemService {
         List<LastBooking> lastBookings = bookingToLastBooking(pastBooking.stream()
                 .filter(booking -> booking.getItem().getId().equals(itemDto.getId()))
                 .sorted(Comparator.comparing(Booking::getEnd)).collect(toList()));
-        if(!lastBookings.isEmpty()) {
+        if (!lastBookings.isEmpty()) {
             itemDto.setLastBooking(lastBookings.get(0));
         }
     }
@@ -175,7 +175,7 @@ public class ItemServiceImpl implements ItemService {
         List<NextBooking> nextBookings = bookingToNexBooking(futureBooking.stream()
                 .filter(booking -> booking.getItem().getId().equals(itemDto.getId()))
                 .sorted(Comparator.comparing(Booking::getStart)).collect(toList()));
-        if(!nextBookings.isEmpty()) {
+        if (!nextBookings.isEmpty()) {
             itemDto.setNextBooking(nextBookings.get(0));
         }
     }
