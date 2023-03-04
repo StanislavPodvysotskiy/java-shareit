@@ -9,9 +9,7 @@ import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.utility.Create;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "/bookings")
@@ -23,34 +21,24 @@ public class BookingController {
 
     @GetMapping
     public List<BookingResponseDto> findByBookerId(@RequestHeader(value = "X-Sharer-User-Id") Integer userId,
-                                    @RequestParam(value = "state", defaultValue = "ALL", required = false) String state,
+                                    @RequestParam(value = "state", defaultValue = "ALL") String state,
                                     HttpServletRequest request) {
         log.info("Получен {} запрос {}", request.getMethod(), request.getRequestURI());
         if (!state.equals("ALL")) {
-            return bookingService.findByState(userId, state)
-                    .stream().filter(booking -> booking.getBooker().getId().equals(userId))
-                    .sorted(Comparator.comparing(BookingResponseDto::getEnd).reversed())
-                    .collect(Collectors.toList());
+            return bookingService.findByStateUser(userId, state);
         }
-        return bookingService.findByBookerId(userId)
-                .stream().sorted(Comparator.comparing(BookingResponseDto::getEnd).reversed())
-                .collect(Collectors.toList());
+        return bookingService.findByBookerId(userId);
     }
 
     @GetMapping("/owner")
     public List<BookingResponseDto> findByOwnerId(@RequestHeader(value = "X-Sharer-User-Id") Integer ownerId,
-                                    @RequestParam(value = "state", defaultValue = "ALL", required = false) String state,
+                                    @RequestParam(value = "state", defaultValue = "ALL") String state,
                                     HttpServletRequest request) {
         log.info("Получен {} запрос {}", request.getMethod(), request.getRequestURI());
         if (!state.equals("ALL")) {
-            return bookingService.findByState(ownerId, state)
-                    .stream().filter(booking -> booking.getItem().getOwner().getId().equals(ownerId))
-                    .sorted(Comparator.comparing(BookingResponseDto::getEnd).reversed())
-                    .collect(Collectors.toList());
+            return bookingService.findByStateOwner(ownerId, state);
         }
-        return bookingService.findByOwnerId(ownerId)
-                .stream().sorted(Comparator.comparing(BookingResponseDto::getEnd).reversed())
-                .collect(Collectors.toList());
+        return bookingService.findByOwnerId(ownerId);
     }
 
     @GetMapping("/{bookingId}")

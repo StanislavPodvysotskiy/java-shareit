@@ -3,6 +3,7 @@ package ru.practicum.shareit.item;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
@@ -19,8 +20,8 @@ public class ItemMapper {
         return item;
     }
 
-    public static ItemDto makeItemDto(Item item) {
-        ItemDto itemDto = new ItemDto();
+    public static ItemResponseDto makeItemDto(Item item) {
+        ItemResponseDto itemDto = new ItemResponseDto();
         itemDto.setId(item.getId());
         itemDto.setName(item.getName());
         itemDto.setDescription(item.getDescription());
@@ -28,7 +29,7 @@ public class ItemMapper {
         return itemDto;
     }
 
-    public static List<ItemDto> makeListItemDto(List<Item> items) {
+    public static List<ItemResponseDto> makeListItemDto(List<Item> items) {
         return items.stream().map(ItemMapper::makeItemDto).collect(Collectors.toList());
     }
 

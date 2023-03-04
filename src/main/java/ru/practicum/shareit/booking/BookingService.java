@@ -16,6 +16,8 @@ public interface BookingService {
 
     List<BookingResponseDto> findByOwnerId(Integer ownerId);
 
-    List<BookingResponseDto> findByState(Integer userId, String state);
+    List<BookingResponseDto> findByStateUser(Integer userId, String state);
+
+    List<BookingResponseDto> findByStateOwner(Integer userId, String state);
 
 }

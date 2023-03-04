@@ -20,12 +20,11 @@ public class BookingMapper {
     }
 
     public static BookingResponseDto makeBookingDto(Booking booking) {
-        BookingResponseDto bookingResponseDto = new BookingResponseDto();
+        BookingResponseDto bookingResponseDto = new BookingResponseDto(booking.getBooker().getId(),
+                booking.getBooker().getName(), booking.getItem().getId(), booking.getItem().getName());
         bookingResponseDto.setId(booking.getId());
         bookingResponseDto.setStart(booking.getStart());
         bookingResponseDto.setEnd(booking.getEnd());
-        bookingResponseDto.setBooker(booking.getBooker());
-        bookingResponseDto.setItem(booking.getItem());
         bookingResponseDto.setStatus(booking.getStatus());
         return bookingResponseDto;
     }
