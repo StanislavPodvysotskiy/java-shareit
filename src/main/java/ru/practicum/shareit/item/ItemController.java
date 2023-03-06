@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
-import ru.practicum.shareit.item.model.Comment;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -53,9 +53,9 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public Comment saveComment(@RequestHeader(value = "X-Sharer-User-Id") Integer userId,
-                               @PathVariable Integer itemId, @RequestBody @Valid CommentDto commentDto,
-                               HttpServletRequest request) {
+    public CommentResponseDto saveComment(@RequestHeader(value = "X-Sharer-User-Id") Integer userId,
+                                          @PathVariable Integer itemId, @RequestBody @Valid CommentDto commentDto,
+                                          HttpServletRequest request) {
         log.info("Получен {} запрос {}", request.getMethod(), request.getRequestURI());
         return itemService.saveComment(commentDto, itemId, userId);
     }
@@ -73,4 +73,5 @@ public class ItemController {
     public void delete(@PathVariable Integer itemId, HttpServletRequest request) {
         log.info("Function not available now");
     }
+
 }

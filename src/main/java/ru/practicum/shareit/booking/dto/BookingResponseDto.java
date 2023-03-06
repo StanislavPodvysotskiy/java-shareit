@@ -4,7 +4,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.practicum.shareit.booking.Status;
+import ru.practicum.shareit.booking.enums.Status;
 
 import java.time.LocalDateTime;
 
@@ -36,4 +36,5 @@ public class BookingResponseDto {
         private final Integer id;
         private final String name;
     }
+
 }

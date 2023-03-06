@@ -25,11 +25,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getById(Integer userId) {
-        User user = userRepository.getById(userId);
-        if (user == null) {
-            throw new NotFoundException("User");
-        }
-        return user;
+        return getUserOrException(userId);
     }
 
     @Override
@@ -41,10 +37,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User update(User user, Integer userId) {
-        User savedUser = userRepository.getById(userId);
-        if (savedUser == null) {
-            throw new NotFoundException("User");
-        }
+        User savedUser = getUserOrException(userId);
         if (user.getEmail() != null && !user.getEmail().isBlank()) {
             savedUser.setEmail(user.getEmail());
         }
@@ -57,6 +50,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public void delete(Integer userId) {
         userRepository.deleteById(userId);
+    }
+
+    private User getUserOrException(Integer userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User with id " + userId));
     }
 
 }

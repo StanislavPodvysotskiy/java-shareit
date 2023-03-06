@@ -6,6 +6,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
+import ru.practicum.shareit.booking.enums.State;
+import ru.practicum.shareit.exception.BookingStatusException;
 import ru.practicum.shareit.utility.Create;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,10 +26,16 @@ public class BookingController {
                                     @RequestParam(value = "state", defaultValue = "ALL") String state,
                                     HttpServletRequest request) {
         log.info("Получен {} запрос {}", request.getMethod(), request.getRequestURI());
-        if (!state.equals("ALL")) {
-            return bookingService.findByStateUser(userId, state);
+        State enumState;
+        try {
+            enumState = State.valueOf(state);
+        } catch (IllegalArgumentException e) {
+            throw new BookingStatusException("Unknown state: " + state);
         }
-        return bookingService.findByBookerId(userId);
+        if (enumState.equals(State.ALL)) {
+            return bookingService.findByBookerId(userId);
+        }
+        return bookingService.findByStateUser(userId, enumState);
     }
 
     @GetMapping("/owner")
@@ -35,10 +43,16 @@ public class BookingController {
                                     @RequestParam(value = "state", defaultValue = "ALL") String state,
                                     HttpServletRequest request) {
         log.info("Получен {} запрос {}", request.getMethod(), request.getRequestURI());
-        if (!state.equals("ALL")) {
-            return bookingService.findByStateOwner(ownerId, state);
+        State enumState;
+        try {
+            enumState = State.valueOf(state);
+        } catch (IllegalArgumentException e) {
+            throw new BookingStatusException("Unknown state: " + state);
         }
-        return bookingService.findByOwnerId(ownerId);
+        if (enumState.equals(State.ALL)) {
+            return bookingService.findByOwnerId(ownerId);
+        }
+        return bookingService.findByStateOwner(ownerId, enumState);
     }
 
     @GetMapping("/{bookingId}")

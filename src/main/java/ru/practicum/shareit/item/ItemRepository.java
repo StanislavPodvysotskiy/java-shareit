@@ -8,10 +8,6 @@ import java.util.List;
 
 public interface ItemRepository extends JpaRepository<Item, Integer> {
 
-    @Override
-    @Query("select i from Item i where i.id = ?1")
-    Item getById(Integer id);
-
     @Query("select i from Item i where i.owner.id = ?1")
     List<Item> findAllByOwnerId(Integer ownerID);
 
