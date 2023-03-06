@@ -1,50 +1,184 @@
 package ru.practicum.shareit.item.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.item.ItemRepository;
-import ru.practicum.shareit.item.ItemService;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.LastBooking;
+import ru.practicum.shareit.booking.model.NextBooking;
+import ru.practicum.shareit.exception.BookingDateTimeException;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.*;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentResponseDto;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemResponseDto;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.model.User;
 
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
+
+import static java.util.stream.Collectors.groupingBy;
+import static org.springframework.data.domain.Sort.Direction.ASC;
+import static org.springframework.data.domain.Sort.Direction.DESC;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
-    private final UserService userService;
+    private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
+
+    private final CommentRepository commentRepository;
 
     @Override
-    public List<Item> getAll(Integer ownerId) {
-        return itemRepository.getAll(ownerId);
+    public List<ItemResponseDto> getAll(Integer ownerId) {
+        List<ItemResponseDto> items = ItemMapper.makeListItemDto(itemRepository.findAllByOwnerId(ownerId));
+        Map<Integer, List<Comment>> comments = commentRepository.findAll().stream()
+                .collect(groupingBy(comment -> comment.getItem().getId()));
+        for (ItemResponseDto item : items) {
+            if (comments.containsKey(item.getId())) {
+                item.setComments(CommentMapper.makeListCommentDto(comments.get(item.getId())));
+            }
+        }
+        Map<Integer, List<Booking>> pastBooking = getLastBookings(ownerId);
+        Map<Integer, List<Booking>> futureBooking = getNextBookings(ownerId);
+        for (ItemResponseDto itemDto : items) {
+            if (pastBooking.containsKey(itemDto.getId())) {
+                setLastBooking(itemDto, pastBooking.get(itemDto.getId()));
+            }
+            if (futureBooking.containsKey(itemDto.getId())) {
+                setNextBooking(itemDto, futureBooking.get(itemDto.getId()));
+            }
+        }
+        return items;
     }
 
     @Override
-    public Item getById(Integer itemId, Integer ownerId) {
-        return itemRepository.getById(itemId, ownerId);
+    public ItemResponseDto getById(Integer itemId, Integer userId) {
+        getUserOrException(userId);
+        Item item = getItemOrException(itemId);
+        ItemResponseDto itemDto = ItemMapper.makeItemDto(item);
+        if (Objects.equals(item.getOwner().getId(), userId)) {
+            Map<Integer, List<Booking>> pastBooking = getLastBookings(userId);
+            Map<Integer, List<Booking>> futureBooking = getNextBookings(userId);
+            if (pastBooking.containsKey(itemDto.getId())) {
+                setLastBooking(itemDto, pastBooking.get(itemDto.getId()));
+            }
+            if (futureBooking.containsKey(itemDto.getId())) {
+                setNextBooking(itemDto, futureBooking.get(itemDto.getId()));
+            }
+        }
+        List<Comment> comments = commentRepository.findByItemId(itemDto.getId());
+        itemDto.setComments(CommentMapper.makeListCommentDto(comments));
+        return itemDto;
     }
 
     @Override
-    public Item save(Item item, Integer ownerId) {
-        userService.getById(ownerId);
-        return itemRepository.save(item, ownerId);
+    @Transactional
+    public ItemResponseDto save(ItemDto itemDto, Integer ownerId) {
+        User user = getUserOrException(ownerId);
+        Item item = ItemMapper.makeItem(itemDto);
+        item.setOwner(user);
+        return ItemMapper.makeItemDto(itemRepository.save(item));
     }
 
     @Override
-    public Item update(Item item, Integer itemId, Integer ownerId) {
-        return itemRepository.update(item, itemId, ownerId);
+    @Transactional
+    public ItemResponseDto update(ItemDto itemDto, Integer itemId, Integer ownerId) {
+        Item item = getItemOrException(itemId);
+        if (!Objects.equals(item.getOwner().getId(), ownerId)) {
+            throw new NotFoundException("Item owner");
+        }
+        if (itemDto.getName() != null && !itemDto.getName().isBlank()) {
+            item.setName(itemDto.getName());
+        }
+        if (itemDto.getDescription() != null && !itemDto.getDescription().isBlank()) {
+            item.setDescription(itemDto.getDescription());
+        }
+        if (itemDto.getAvailable() != null) {
+            item.setAvailable(itemDto.getAvailable());
+        }
+        return ItemMapper.makeItemDto(item);
     }
 
     @Override
-    public List<Item> search(String text) {
-        return itemRepository.search(text);
+    @Transactional
+    public CommentResponseDto saveComment(CommentDto commentDto, Integer itemId, Integer userId) {
+        Item item = getItemOrException(itemId);
+        User user = getUserOrException(userId);
+        List<Booking> pastBooking = bookingRepository.findPastBookingByItemId(LocalDateTime.now(), itemId);
+        if (pastBooking.isEmpty()) {
+            throw new BookingDateTimeException("Item without previous booking");
+        }
+        Comment comment = new Comment();
+        comment.setItem(item);
+        comment.setText(commentDto.getText());
+        comment.setAuthorName(user.getName());
+        return CommentMapper.makeCommentDto(commentRepository.save(comment));
+    }
+
+    @Override
+    public List<ItemResponseDto> search(String text) {
+        return ItemMapper.makeListItemDto(itemRepository.search(text));
     }
 
     @Override
     public void delete(Integer itemId) {
-        itemRepository.delete(itemId);
+        itemRepository.deleteById(itemId);
+    }
+
+    private Map<Integer, List<Booking>> getLastBookings(Integer userId) {
+        return bookingRepository.findPastBookingOwner(LocalDateTime.now(), userId,
+                        Sort.by(DESC, "end"))
+                .stream().collect(groupingBy(booking -> booking.getItem().getId()));
+    }
+
+    private Map<Integer, List<Booking>> getNextBookings(Integer userId) {
+        return bookingRepository.findFutureBookingOwnerApproved(LocalDateTime.now(), userId,
+                        Sort.by(ASC, "start"))
+                .stream().collect(groupingBy(booking -> booking.getItem().getId()));
+    }
+
+    private void setLastBooking(ItemResponseDto itemDto, List<Booking> pastBooking) {
+        itemDto.setLastBooking(bookingToLastBooking(Objects.requireNonNull(pastBooking
+                .stream().findFirst().orElse(null))));
+    }
+
+    private void setNextBooking(ItemResponseDto itemDto, List<Booking> futureBooking) {
+        itemDto.setNextBooking(bookingToNexBooking(Objects.requireNonNull(futureBooking
+                .stream().findFirst().orElse(null))));
+    }
+
+    private LastBooking bookingToLastBooking(Booking booking) {
+        LastBooking lastBooking = new LastBooking();
+        lastBooking.setId(booking.getId());
+        lastBooking.setBookerId(booking.getBooker().getId());
+        return lastBooking;
+    }
+
+    private NextBooking bookingToNexBooking(Booking booking) {
+        NextBooking nextBooking = new NextBooking();
+        nextBooking.setId(booking.getId());
+        nextBooking.setBookerId(booking.getBooker().getId());
+        return nextBooking;
+    }
+
+    private User getUserOrException(Integer userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User with id " + userId));
+    }
+
+    private Item getItemOrException(Integer itemId) {
+        return itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Item with id " + itemId));
     }
 
 }
