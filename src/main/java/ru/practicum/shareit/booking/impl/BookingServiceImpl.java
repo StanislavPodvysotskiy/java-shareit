@@ -21,6 +21,8 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static org.springframework.data.domain.Sort.Direction.DESC;
+
 @Service
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
@@ -33,14 +35,14 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingResponseDto> findByBookerId(Integer userId) {
         getUserOrException(userId);
         return BookingMapper.makeListBookingDto(bookingRepository
-                .findByBookerId(userId, Sort.by(Sort.Direction.DESC, "end")));
+                .findByBookerId(userId, Sort.by(DESC, "end")));
     }
 
     @Override
     public List<BookingResponseDto> findByOwnerId(Integer ownerId) {
         getUserOrException(ownerId);
         return BookingMapper.makeListBookingDto(bookingRepository
-                .findByOwnerId(ownerId, Sort.by(Sort.Direction.DESC, "end")));
+                .findByOwnerId(ownerId, Sort.by(DESC, "end")));
     }
 
     @Override
@@ -60,22 +62,22 @@ public class BookingServiceImpl implements BookingService {
         switch (state) {
             case WAITING:
                 bookings = bookingRepository.findByStatusAndBookerId(Status.WAITING, userId,
-                        Sort.by(Sort.Direction.DESC, "end"));
+                        Sort.by(DESC, "end"));
                 break;
             case REJECTED:
                 bookings = bookingRepository.findByStatusAndBookerId(Status.REJECTED, userId,
-                        Sort.by(Sort.Direction.DESC, "end"));
+                        Sort.by(DESC, "end"));
                 break;
             case CURRENT:
                 bookings = bookingRepository.findCurrentBookingUser(LocalDateTime.now(), userId);
                 break;
             case PAST:
                 bookings = bookingRepository.findPastBookingUser(LocalDateTime.now(), userId,
-                        Sort.by(Sort.Direction.DESC, "end"));
+                        Sort.by(DESC, "end"));
                 break;
             case FUTURE:
                 bookings = bookingRepository.findFutureBookingUser(LocalDateTime.now(), userId,
-                        Sort.by(Sort.Direction.DESC, "end"));
+                        Sort.by(DESC, "end"));
                 break;
             default:
                 throw new BookingStatusException("Unknown state: " + state);
@@ -89,22 +91,22 @@ public class BookingServiceImpl implements BookingService {
         switch (state) {
             case WAITING:
                 bookings = bookingRepository.findByStatusAndOwnerId(Status.WAITING, ownerId,
-                        Sort.by(Sort.Direction.DESC, "end"));
+                        Sort.by(DESC, "end"));
                 break;
             case REJECTED:
                 bookings = bookingRepository.findByStatusAndOwnerId(Status.REJECTED, ownerId,
-                        Sort.by(Sort.Direction.DESC, "end"));
+                        Sort.by(DESC, "end"));
                 break;
             case CURRENT:
                 bookings = bookingRepository.findCurrentBookingOwner(LocalDateTime.now(), ownerId);
                 break;
             case PAST:
                 bookings = bookingRepository.findPastBookingOwner(LocalDateTime.now(), ownerId,
-                        Sort.by(Sort.Direction.DESC, "end"));
+                        Sort.by(DESC, "end"));
                 break;
             case FUTURE:
                 bookings = bookingRepository.findFutureBookingOwner(LocalDateTime.now(), ownerId,
-                        Sort.by(Sort.Direction.DESC, "end"));
+                        Sort.by(DESC, "end"));
                 break;
             default:
                 throw new BookingStatusException("Unknown state: " + state);

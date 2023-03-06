@@ -26,12 +26,7 @@ public class BookingController {
                                     @RequestParam(value = "state", defaultValue = "ALL") String state,
                                     HttpServletRequest request) {
         log.info("Получен {} запрос {}", request.getMethod(), request.getRequestURI());
-        State enumState;
-        try {
-            enumState = State.valueOf(state);
-        } catch (IllegalArgumentException e) {
-            throw new BookingStatusException("Unknown state: " + state);
-        }
+        State enumState = getStateOrException(state);
         if (enumState.equals(State.ALL)) {
             return bookingService.findByBookerId(userId);
         }
@@ -43,12 +38,7 @@ public class BookingController {
                                     @RequestParam(value = "state", defaultValue = "ALL") String state,
                                     HttpServletRequest request) {
         log.info("Получен {} запрос {}", request.getMethod(), request.getRequestURI());
-        State enumState;
-        try {
-            enumState = State.valueOf(state);
-        } catch (IllegalArgumentException e) {
-            throw new BookingStatusException("Unknown state: " + state);
-        }
+        State enumState = getStateOrException(state);
         if (enumState.equals(State.ALL)) {
             return bookingService.findByOwnerId(ownerId);
         }
@@ -75,6 +65,16 @@ public class BookingController {
                            @PathVariable Integer bookingId, HttpServletRequest request) {
         log.info("Получен {} запрос {}", request.getMethod(), request.getRequestURI());
         return bookingService.update(userId, isApproved, bookingId);
+    }
+
+    private State getStateOrException(String state) {
+        State enumState;
+        try {
+            enumState = State.valueOf(state);
+        } catch (IllegalArgumentException e) {
+            throw new BookingStatusException("Unknown state: " + state);
+        }
+        return enumState;
     }
 
 }
