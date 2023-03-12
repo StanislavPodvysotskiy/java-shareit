@@ -68,7 +68,7 @@ public class ItemRequestServiceImplTest {
 
         assertThat(targetRequests, hasSize(sourceRequests.size()));
         for (ItemRequestDto sourceRequest : sourceRequests) {
-            assertThat(targetRequests, hasItem( allOf(
+            assertThat(targetRequests, hasItem(allOf(
                     hasProperty("id", notNullValue()),
                     hasProperty("description", equalTo(sourceRequest.getDescription())),
                     hasProperty("created", notNullValue())
@@ -93,7 +93,7 @@ public class ItemRequestServiceImplTest {
 
         assertThat(targetRequests, hasSize(sourceRequests.size()));
         for (ItemRequestDto sourceRequest : sourceRequests) {
-            assertThat(targetRequests, hasItem( allOf(
+            assertThat(targetRequests, hasItem(allOf(
                     hasProperty("id", notNullValue()),
                     hasProperty("description", equalTo(sourceRequest.getDescription())),
                     hasProperty("created", notNullValue())
