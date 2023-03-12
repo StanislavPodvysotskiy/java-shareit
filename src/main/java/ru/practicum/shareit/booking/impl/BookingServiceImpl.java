@@ -127,9 +127,7 @@ public class BookingServiceImpl implements BookingService {
         if (!item.getAvailable()) {
             throw new ItemNotAvailableException("Item not available now");
         }
-        Booking booking = new Booking();
-        booking.setStart(bookingDto.getStart());
-        booking.setEnd(bookingDto.getEnd());
+        Booking booking = BookingMapper.makeBooking(bookingDto);
         booking.setBooker(booker);
         booking.setItem(item);
         booking.setStatus(Status.WAITING);
