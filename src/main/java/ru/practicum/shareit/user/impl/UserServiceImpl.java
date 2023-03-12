@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.UserMapper;
-import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.dao.UserRepository;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
@@ -19,13 +19,13 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
-    public List<User> getAll() {
-        return userRepository.findAll();
+    public List<UserDto> getAll() {
+        return UserMapper.makeUserDtoList(userRepository.findAll());
     }
 
     @Override
-    public User getById(Integer userId) {
-        return getUserOrException(userId);
+    public UserDto getById(Integer userId) {
+        return UserMapper.makeUserDto(getUserOrException(userId));
     }
 
     @Override
@@ -36,15 +36,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User update(User user, Integer userId) {
+    public UserDto update(UserDto userDto, Integer userId) {
         User savedUser = getUserOrException(userId);
-        if (user.getEmail() != null && !user.getEmail().isBlank()) {
-            savedUser.setEmail(user.getEmail());
+        if (userDto.getEmail() != null && !userDto.getEmail().isBlank()) {
+            savedUser.setEmail(userDto.getEmail());
         }
-        if (user.getName() != null && !user.getName().isBlank()) {
-            savedUser.setName(user.getName());
+        if (userDto.getName() != null && !userDto.getName().isBlank()) {
+            savedUser.setName(userDto.getName());
         }
-        return savedUser;
+        return UserMapper.makeUserDto(savedUser);
     }
 
     @Override

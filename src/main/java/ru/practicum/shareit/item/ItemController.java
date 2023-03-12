@@ -2,6 +2,7 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentResponseDto;
@@ -10,25 +11,27 @@ import ru.practicum.shareit.item.dto.ItemResponseDto;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class ItemController {
 
     private final ItemService itemService;
 
     @GetMapping
     public List<ItemResponseDto> getAll(@RequestHeader(value = "X-Sharer-User-Id") Integer ownerId,
+                                        @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+                                        @RequestParam(defaultValue = "10") @Positive Integer size,
                                         HttpServletRequest request) {
         log.info("Получен {} запрос {}", request.getMethod(), request.getRequestURI());
-        return itemService.getAll(ownerId)
-                .stream().sorted(Comparator.comparing(ItemResponseDto::getId)).collect(Collectors.toList());
+        return itemService.getAll(ownerId, from, size);
     }
 
     @GetMapping("/{itemId}")
@@ -61,12 +64,15 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemResponseDto> search(@RequestParam (value = "text") String text, HttpServletRequest request) {
+    public List<ItemResponseDto> search(@RequestParam (value = "text") String text,
+                                        @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+                                        @RequestParam(defaultValue = "10") @Positive Integer size,
+                                        HttpServletRequest request) {
         log.info("Получен {} запрос {} поиск {}", request.getMethod(), request.getRequestURI(), text);
         if (text.isBlank()) {
             return Collections.emptyList();
         }
-        return itemService.search(text);
+        return itemService.search(text, from, size);
     }
 
     @DeleteMapping("/{itemId}")
