@@ -75,9 +75,4 @@ public class ItemController {
         return itemService.search(text, from, size);
     }
 
-    @DeleteMapping("/{itemId}")
-    public void delete(@PathVariable Integer itemId, HttpServletRequest request) {
-        log.info("Function not available now");
-    }
-
 }

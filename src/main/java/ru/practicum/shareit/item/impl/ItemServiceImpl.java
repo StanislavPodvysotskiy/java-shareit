@@ -134,11 +134,6 @@ public class ItemServiceImpl implements ItemService {
                 .search(text, PageRequest.of(from / size, size)).getContent());
     }
 
-    @Override
-    public void delete(Integer itemId) {
-        itemRepository.deleteById(itemId);
-    }
-
     private Map<Integer, List<Booking>> getLastBookings(Integer userId) {
         return bookingRepository.findPastBookingOwner(LocalDateTime.now(), userId,
                         Sort.by(DESC, "end"))

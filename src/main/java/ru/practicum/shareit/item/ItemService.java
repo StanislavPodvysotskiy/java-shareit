@@ -19,8 +19,6 @@ public interface ItemService {
 
     List<ItemResponseDto> search(String text, Integer from, Integer size);
 
-    void delete(Integer itemId);
-
     CommentResponseDto saveComment(CommentDto commentDto, Integer itemId, Integer userId);
 
 }
