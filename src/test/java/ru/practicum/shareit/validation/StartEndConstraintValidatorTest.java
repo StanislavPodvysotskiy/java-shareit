@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.validation.StartEndConstraintValidator;
 
-import javax.validation.ClockProvider;
 import javax.validation.ConstraintValidatorContext;
 import java.time.LocalDateTime;
 
