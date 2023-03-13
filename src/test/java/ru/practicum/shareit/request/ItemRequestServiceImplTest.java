@@ -4,8 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.practicum.shareit.item.ItemService;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
+import ru.practicum.shareit.request.impl.ItemRequestServiceImpl;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -15,6 +19,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.allOf;
@@ -30,8 +36,9 @@ import static org.hamcrest.Matchers.hasProperty;
 public class ItemRequestServiceImplTest {
 
     private final EntityManager em;
-    private final ItemRequestService service;
+    private final ItemRequestServiceImpl service;
     private final UserService userService;
+    private final ItemService itemService;
 
     @Test
     public void save() {
@@ -114,6 +121,31 @@ public class ItemRequestServiceImplTest {
         assertThat(itemRequestResponseDto.getId(), equalTo(itemRequest.getId()));
         assertThat(itemRequestResponseDto.getDescription(), equalTo(itemRequest.getDescription()));
         assertThat(itemRequestResponseDto.getCreated(), equalTo(itemRequest.getCreated()));
+    }
+
+    @Test
+    public void setItems() {
+        User user = addUser("userName", "useer@mail.ru");
+        ItemDto itemDto = new ItemDto();
+        itemDto.setName("itemName");
+        itemDto.setDescription("description");
+        itemDto.setAvailable(true);
+        itemDto.setRequestId(11);
+        itemService.save(itemDto, user.getId());
+        TypedQuery<Item> query = em.createQuery("select i from Item i " +
+                "where i.owner.id = :ownerId", Item.class);
+        Item item = query.setParameter("ownerId", user.getId()).getSingleResult();
+        ItemRequestResponseDto itemRequestResponseDto = new ItemRequestResponseDto();
+        itemRequestResponseDto.setId(11);
+        itemRequestResponseDto.setDescription("description");
+        itemRequestResponseDto.setCreated(LocalDateTime.now());
+        List<ItemRequestResponseDto> itemsRequestsDto = new ArrayList<>();
+        itemsRequestsDto.add(itemRequestResponseDto);
+        List<ItemRequestResponseDto> addItem = service.setItems(itemsRequestsDto);
+        assertThat(addItem, hasSize(1));
+        assertThat(addItem.get(0).getId(), notNullValue());
+        assertThat(addItem.get(0).getDescription(), equalTo(itemRequestResponseDto.getDescription()));
+        assertThat(addItem.get(0).getItems(), hasSize(1));
     }
 
     private ItemRequestDto makeItemRequestDto(String description) {

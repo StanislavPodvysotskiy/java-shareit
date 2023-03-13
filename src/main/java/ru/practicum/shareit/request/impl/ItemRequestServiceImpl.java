@@ -53,7 +53,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         return setItems(requestsDto);
     }
 
-    private List<ItemRequestResponseDto> setItems(List<ItemRequestResponseDto> requestsDto) {
+    public List<ItemRequestResponseDto> setItems(List<ItemRequestResponseDto> requestsDto) {
         Map<Integer, List<Item>> items = itemRepository.findAllWhereRequestIdNotNull()
                 .stream().collect(groupingBy(Item::getRequestId));
         for (ItemRequestResponseDto itemRequestDto : requestsDto) {
