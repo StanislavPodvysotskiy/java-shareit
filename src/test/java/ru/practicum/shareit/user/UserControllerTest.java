@@ -113,7 +113,5 @@ public class UserControllerTest {
         userService.save(userDto);
         mvc.perform(delete("/users/1"))
                 .andExpect(status().isOk());
-
     }
-    
 }
