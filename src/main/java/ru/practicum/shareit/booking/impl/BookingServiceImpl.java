@@ -74,7 +74,7 @@ public class BookingServiceImpl implements BookingService {
                 break;
             case PAST:
                 bookings = bookingRepository.findPastBookingUser(LocalDateTime.now(), userId,
-                        Sort.by(DESC, "start"));
+                        Sort.by(DESC, "end"));
                 break;
             case FUTURE:
                 bookings = bookingRepository.findFutureBookingUser(LocalDateTime.now(), userId,
