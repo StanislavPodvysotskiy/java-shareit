@@ -4,8 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.practicum.shareit.booking.BookingService;
+import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.LastBooking;
+import ru.practicum.shareit.booking.model.NextBooking;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
+import ru.practicum.shareit.item.impl.ItemServiceImpl;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -15,6 +23,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -29,8 +38,9 @@ import static org.hamcrest.Matchers.hasSize;
 public class ItemServiceImplTest {
 
     private final EntityManager em;
-    private final ItemService service;
+    private final ItemServiceImpl service;
     private final UserService userService;
+    private final BookingService bookingService;
 
     @Test
     public void save() {
@@ -120,6 +130,43 @@ public class ItemServiceImplTest {
         assertThat(items.get(0).getAvailable(), equalTo(itemDto.getAvailable()));
     }
 
+    @Test
+    public void saveComment() {
+        User user = addUser("userName", "user@mail.ru");
+        User booker = addUser("bookerName", "booker@mail.ru");
+        Item item = addItem(user.getId());
+        Booking booking = addBooking(item.getId(), booker.getId());
+        bookingService.update(user.getId(), true, booking.getId());
+        CommentDto commentDto = new CommentDto();
+        commentDto.setText("text");
+        CommentResponseDto commentResponseDto = service.saveComment(commentDto, item.getId(), user.getId());
+        assertThat(commentResponseDto.getId(), notNullValue());
+        assertThat(commentResponseDto.getText(), equalTo(commentDto.getText()));
+        assertThat(commentResponseDto.getCreated(), notNullValue());
+    }
+
+    @Test
+    public void bookingToLastBooking() {
+        User booker = addUser("bookerName", "booker1@email.ru");
+        Booking booking = new Booking();
+        booking.setId(1);
+        booking.setBooker(booker);
+        LastBooking lastBooking = service.bookingToLastBooking(booking);
+        assertThat(lastBooking.getId(), equalTo(1));
+        assertThat(lastBooking.getBookerId(), equalTo(booker.getId()));
+    }
+
+    @Test
+    public void bookingToNexBooking() {
+        User booker = addUser("bookerName", "booker2@email.ru");
+        Booking booking = new Booking();
+        booking.setId(1);
+        booking.setBooker(booker);
+        NextBooking nextBooking = service.bookingToNexBooking(booking);
+        assertThat(nextBooking.getId(), equalTo(1));
+        assertThat(nextBooking.getBookerId(), equalTo(booker.getId()));
+    }
+
     private ItemDto makeItemDto(String name, String description) {
         ItemDto itemDto = new ItemDto();
         itemDto.setName(name);
@@ -137,5 +184,26 @@ public class ItemServiceImplTest {
         TypedQuery<User> query = em.createQuery("Select u from User u where u.email = :email", User.class);
         return query.setParameter("email", userDto.getEmail())
                 .getSingleResult();
+    }
+
+    private Item addItem(Integer userId) {
+        ItemDto itemDto = new ItemDto();
+        itemDto.setName("itemName");
+        itemDto.setDescription("description");
+        itemDto.setAvailable(true);
+        service.save(itemDto, userId);
+        TypedQuery<Item> query = em.createQuery("Select i from Item i where i.name = :name", Item.class);
+        return query.setParameter("name", itemDto.getName())
+                .getSingleResult();
+    }
+
+    private Booking addBooking(Integer itemId, Integer bookerId) {
+        BookingDto bookingDto = new BookingDto();
+        bookingDto.setStart(LocalDateTime.parse("2023-01-02T12:13:14"));
+        bookingDto.setEnd(LocalDateTime.parse("2023-02-02T12:13:14"));
+        bookingDto.setItemId(itemId);
+        bookingService.save(bookingDto, bookerId);
+        TypedQuery<Booking> query = em.createQuery("Select b from Booking b where b.booker.id = :id", Booking.class);
+        return query.setParameter("id", bookerId).getSingleResult();
     }
 }

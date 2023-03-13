@@ -156,14 +156,14 @@ public class ItemServiceImpl implements ItemService {
                 .stream().findFirst().orElse(null))));
     }
 
-    private LastBooking bookingToLastBooking(Booking booking) {
+    public LastBooking bookingToLastBooking(Booking booking) {
         LastBooking lastBooking = new LastBooking();
         lastBooking.setId(booking.getId());
         lastBooking.setBookerId(booking.getBooker().getId());
         return lastBooking;
     }
 
-    private NextBooking bookingToNexBooking(Booking booking) {
+    public NextBooking bookingToNexBooking(Booking booking) {
         NextBooking nextBooking = new NextBooking();
         nextBooking.setId(booking.getId());
         nextBooking.setBookerId(booking.getBooker().getId());
