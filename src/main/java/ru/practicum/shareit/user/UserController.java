@@ -22,13 +22,13 @@ public class UserController {
     @GetMapping
     public List<UserDto> getAll(HttpServletRequest request) {
         log.info("Получен {} запрос {}", request.getMethod(), request.getRequestURI());
-        return UserMapper.makeUserDtoList(userService.getAll());
+        return userService.getAll();
     }
 
     @GetMapping("/{userId}")
     public UserDto getById(@PathVariable Integer userId, HttpServletRequest request) {
         log.info("Получен {} запрос {} пользователя с ID {}", request.getMethod(), request.getRequestURI(), userId);
-        return UserMapper.makeUserDto(userService.getById(userId));
+        return userService.getById(userId);
     }
 
     @PostMapping
@@ -41,7 +41,7 @@ public class UserController {
     public UserDto update(@RequestBody @Validated(Update.class) UserDto userDto,
                           @PathVariable Integer userId, HttpServletRequest request) {
         log.info("Получен {} запрос {}", request.getMethod(), request.getRequestURI());
-        return UserMapper.makeUserDto(userService.update(UserMapper.makeUser(userDto), userId));
+        return userService.update(userDto, userId);
     }
 
     @DeleteMapping("/{userId}")
