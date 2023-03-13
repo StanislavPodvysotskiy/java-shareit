@@ -17,9 +17,9 @@ public class StartEndConstraintValidatorTest {
     private final BookingDto bookingDto = new BookingDto();
 
     private final ConstraintValidatorContext cxt = new ConstraintValidatorContext() {
+        
         @Override
         public void disableDefaultConstraintViolation() {
-            
         }
 
         @Override
