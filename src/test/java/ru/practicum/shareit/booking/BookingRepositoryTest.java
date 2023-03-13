@@ -86,8 +86,8 @@ public class BookingRepositoryTest {
 
     @Test
     public void findByBookerId() {
-        List<Booking> bookings = bookingRepository.
-                findByBookerId(user.getId(), PageRequest.of(0, 10)).getContent();
+        List<Booking> bookings = bookingRepository
+                .findByBookerId(user.getId(), PageRequest.of(0, 10)).getContent();
         assertEquals(2, bookings.size());
         assertNotNull(bookings.get(0).getId());
         assertEquals(bookingPresent.getStart(), bookings.get(0).getStart());
@@ -99,8 +99,8 @@ public class BookingRepositoryTest {
 
     @Test
     public void findByOwnerId() {
-        List<Booking> bookings = bookingRepository.
-                findByOwnerId(item.getOwner().getId(), PageRequest.of(0, 10)).getContent();
+        List<Booking> bookings = bookingRepository
+                .findByOwnerId(item.getOwner().getId(), PageRequest.of(0, 10)).getContent();
         assertEquals(2, bookings.size());
         assertNotNull(bookings.get(0).getId());
         assertEquals(bookingPresent.getStart(), bookings.get(0).getStart());
@@ -112,8 +112,8 @@ public class BookingRepositoryTest {
 
     @Test
     public void findCurrentBookingUser() {
-        List<Booking> bookings = bookingRepository.
-                findCurrentBookingUser(LocalDateTime.parse("2023-03-10T12:13:14"), user.getId());
+        List<Booking> bookings = bookingRepository
+                .findCurrentBookingUser(LocalDateTime.parse("2023-03-10T12:13:14"), user.getId());
         assertEquals(1, bookings.size());
         assertNotNull(bookings.get(0).getId());
         assertEquals(bookingPresent.getStart(), bookings.get(0).getStart());
@@ -125,8 +125,8 @@ public class BookingRepositoryTest {
 
     @Test
     public void findCurrentBookingOwner() {
-        List<Booking> bookings = bookingRepository.
-                findCurrentBookingOwner(LocalDateTime.parse("2023-03-10T12:13:14"), item.getOwner().getId());
+        List<Booking> bookings = bookingRepository
+                .findCurrentBookingOwner(LocalDateTime.parse("2023-03-10T12:13:14"), item.getOwner().getId());
         assertEquals(1, bookings.size());
         assertNotNull(bookings.get(0).getId());
         assertEquals(bookingPresent.getStart(), bookings.get(0).getStart());
@@ -138,8 +138,8 @@ public class BookingRepositoryTest {
 
     @Test
     public void findPastBookingUser() {
-        List<Booking> bookings = bookingRepository.
-                findPastBookingUser(LocalDateTime.parse("2023-03-10T12:13:14"),
+        List<Booking> bookings = bookingRepository
+                .findPastBookingUser(LocalDateTime.parse("2023-03-10T12:13:14"),
                         user.getId(), Sort.by(ASC, "start"));
         assertEquals(1, bookings.size());
         assertNotNull(bookings.get(0).getId());
@@ -152,8 +152,8 @@ public class BookingRepositoryTest {
 
     @Test
     public void findPastBookingByItemId() {
-        List<Booking> bookings = bookingRepository.
-                findPastBookingByItemId(LocalDateTime.parse("2023-03-10T12:13:14"), item.getId());
+        List<Booking> bookings = bookingRepository
+                .findPastBookingByItemId(LocalDateTime.parse("2023-03-10T12:13:14"), item.getId());
         assertEquals(1, bookings.size());
         assertNotNull(bookings.get(0).getId());
         assertEquals(bookingPresent.getStart(), bookings.get(0).getStart());
@@ -165,8 +165,8 @@ public class BookingRepositoryTest {
 
     @Test
     public void findPastBookingOwner() {
-        List<Booking> bookings = bookingRepository.
-                findPastBookingOwner(LocalDateTime.parse("2023-03-10T12:13:14"),
+        List<Booking> bookings = bookingRepository
+                .findPastBookingOwner(LocalDateTime.parse("2023-03-10T12:13:14"),
                         item.getOwner().getId(), Sort.by(ASC, "start"));
         assertEquals(1, bookings.size());
         assertNotNull(bookings.get(0).getId());
@@ -179,8 +179,8 @@ public class BookingRepositoryTest {
 
     @Test
     public void findFutureBookingUser() {
-        List<Booking> bookings = bookingRepository.
-                findFutureBookingUser(LocalDateTime.parse("2023-03-10T12:13:14"),
+        List<Booking> bookings = bookingRepository
+                .findFutureBookingUser(LocalDateTime.parse("2023-03-10T12:13:14"),
                         user.getId(), Sort.by(ASC, "start"));
         assertEquals(1, bookings.size());
         assertNotNull(bookings.get(0).getId());
@@ -193,8 +193,8 @@ public class BookingRepositoryTest {
 
     @Test
     public void findFutureBookingOwner() {
-        List<Booking> bookings = bookingRepository.
-                findFutureBookingOwner(LocalDateTime.parse("2023-03-10T12:13:14"),
+        List<Booking> bookings = bookingRepository
+                .findFutureBookingOwner(LocalDateTime.parse("2023-03-10T12:13:14"),
                         item.getOwner().getId(), Sort.by(ASC, "start"));
         assertEquals(1, bookings.size());
         assertNotNull(bookings.get(0).getId());
@@ -207,8 +207,8 @@ public class BookingRepositoryTest {
 
     @Test
     public void findFutureBookingOwnerApproved() {
-        List<Booking> bookings = bookingRepository.
-                findFutureBookingOwnerApproved(LocalDateTime.parse("2023-03-10T12:13:14"),
+        List<Booking> bookings = bookingRepository
+                .findFutureBookingOwnerApproved(LocalDateTime.parse("2023-03-10T12:13:14"),
                         item.getOwner().getId(), Sort.by(ASC, "start"));
         assertEquals(1, bookings.size());
         assertNotNull(bookings.get(0).getId());
@@ -221,8 +221,8 @@ public class BookingRepositoryTest {
 
     @Test
     public void findByStatusAndBookerId() {
-        List<Booking> bookings = bookingRepository.
-                findByStatusAndBookerId(Status.APPROVED, user.getId(), Sort.by(ASC, "start"));
+        List<Booking> bookings = bookingRepository.findByStatusAndBookerId(
+                Status.APPROVED, user.getId(), Sort.by(ASC, "start"));
         assertEquals(2, bookings.size());
         assertNotNull(bookings.get(0).getId());
         assertEquals(bookingPresent.getStart(), bookings.get(0).getStart());
@@ -234,8 +234,8 @@ public class BookingRepositoryTest {
 
     @Test
     public void findByStatusAndOwnerId() {
-        List<Booking> bookings = bookingRepository.
-                findByStatusAndOwnerId(Status.APPROVED, item.getOwner().getId(), Sort.by(ASC, "start"));
+        List<Booking> bookings = bookingRepository.findByStatusAndOwnerId(
+                Status.APPROVED, item.getOwner().getId(), Sort.by(ASC, "start"));
         assertEquals(2, bookings.size());
         assertNotNull(bookings.get(0).getId());
         assertEquals(bookingPresent.getStart(), bookings.get(0).getStart());
