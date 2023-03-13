@@ -74,7 +74,7 @@ public class BookingController {
         return bookingService.update(userId, isApproved, bookingId);
     }
 
-    private State getStateOrException(String state) {
+    public State getStateOrException(String state) {
         State enumState;
         try {
             enumState = State.valueOf(state);

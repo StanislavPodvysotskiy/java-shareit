@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
+import ru.practicum.shareit.booking.enums.State;
 import ru.practicum.shareit.booking.enums.Status;
 
 import java.nio.charset.StandardCharsets;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -119,7 +121,7 @@ public class BookingControllerTest {
     }
 
     @Test
-    public void findByBookerId() throws Exception {
+    public void findByBookerIdAll() throws Exception {
         when(bookingService.findByBookerId(anyInt(), anyInt(), anyInt()))
                 .thenReturn(List.of(bookingResponseDto));
 
@@ -141,7 +143,29 @@ public class BookingControllerTest {
     }
 
     @Test
-    public void findByOwnerId() throws Exception {
+    public void findByBookerIdWaiting() throws Exception {
+        when(bookingService.findByStateUser(anyInt(), any()))
+                .thenReturn(List.of(bookingResponseDto));
+
+        mvc.perform(get("/bookings")
+                        .header("X-Sharer-User-Id", 1)
+                        .param("state", "WAITING")
+                        .param("from", String.valueOf(0))
+                        .param("size", String.valueOf(10)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", is(bookingResponseDto.getId())))
+                .andExpect(jsonPath("$[0].start", is(notNullValue())))
+                .andExpect(jsonPath("$[0].end", is(notNullValue())))
+                .andExpect(jsonPath("$[0].status", is(bookingResponseDto.getStatus().toString())))
+                .andExpect(jsonPath("$[0].booker.id", is(bookingResponseDto.getBooker().getId())))
+                .andExpect(jsonPath("$[0].booker.name", is(bookingResponseDto.getBooker().getName())))
+                .andExpect(jsonPath("$[0].item.id", is(bookingResponseDto.getItem().getId())))
+                .andExpect(jsonPath("$[0].item.name", is(bookingResponseDto.getItem().getName())));
+    }
+
+    @Test
+    public void findByOwnerIdAll() throws Exception {
         when(bookingService.findByOwnerId(anyInt(), anyInt(), anyInt()))
                 .thenReturn(List.of(bookingResponseDto));
 
@@ -160,5 +184,34 @@ public class BookingControllerTest {
                 .andExpect(jsonPath("$[0].booker.name", is(bookingResponseDto.getBooker().getName())))
                 .andExpect(jsonPath("$[0].item.id", is(bookingResponseDto.getItem().getId())))
                 .andExpect(jsonPath("$[0].item.name", is(bookingResponseDto.getItem().getName())));
+    }
+
+    @Test
+    public void findByOwnerIdWaiting() throws Exception {
+        when(bookingService.findByStateOwner(anyInt(), any()))
+                .thenReturn(List.of(bookingResponseDto));
+
+        mvc.perform(get("/bookings/owner")
+                        .header("X-Sharer-User-Id", 1)
+                        .param("state", "WAITING")
+                        .param("from", String.valueOf(0))
+                        .param("size", String.valueOf(10)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", is(bookingResponseDto.getId())))
+                .andExpect(jsonPath("$[0].start", is(notNullValue())))
+                .andExpect(jsonPath("$[0].end", is(notNullValue())))
+                .andExpect(jsonPath("$[0].status", is(bookingResponseDto.getStatus().toString())))
+                .andExpect(jsonPath("$[0].booker.id", is(bookingResponseDto.getBooker().getId())))
+                .andExpect(jsonPath("$[0].booker.name", is(bookingResponseDto.getBooker().getName())))
+                .andExpect(jsonPath("$[0].item.id", is(bookingResponseDto.getItem().getId())))
+                .andExpect(jsonPath("$[0].item.name", is(bookingResponseDto.getItem().getName())));
+    }
+
+    @Test
+    public void getStateOrExceptionApproved() {
+        String stateString = "APPROVED";
+        State state = controller.getStateOrException(stateString);
+        assertEquals(State.APPROVED, state);
     }
 }
