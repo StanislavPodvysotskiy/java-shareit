@@ -112,6 +112,23 @@ public class UserServiceImplTest {
         assertThat(userCheck.getEmail(), equalTo(userDto.getEmail()));
     }
 
+    @Test
+    public void delete() {
+        UserDto userDto1 = makeUserDto("name1", "test1@mail.ru");
+        UserDto userDto2 = makeUserDto("name2", "test2@mail.ru");
+        service.save(userDto1);
+        service.save(userDto2);
+        TypedQuery<User> query = em.createQuery("Select u from User u where u.email = :email", User.class);
+        User user1 = query.setParameter("email", userDto1.getEmail()).getSingleResult();
+        User user2 = query.setParameter("email", userDto2.getEmail()).getSingleResult();
+        service.delete(user1.getId());
+        List<UserDto> users = service.getAll();
+        assertThat(users, hasSize(1));
+        assertThat(users.get(0).getId(), equalTo(user2.getId()));
+        assertThat(users.get(0).getName(), equalTo(user2.getName()));
+        assertThat(users.get(0).getEmail(), equalTo(user2.getEmail()));
+    }
+
     private UserDto makeUserDto(String name, String email) {
         UserDto userDto = new UserDto();
         userDto.setName(name);
