@@ -196,10 +196,10 @@ public class BookingServiceImplTest {
         Boolean isApproved = false;
         service.save(bookingDto, booker.getId());
         TypedQuery<Booking> query = em.createQuery("Select b from Booking b " +
-                "where b.booker.id = :bookerId", Booking.class);
-        Booking booking = query.setParameter("bookerId", booker.getId()).getSingleResult();
+                "where b.item.owner.id = :ownerId", Booking.class);
+        Booking booking = query.setParameter("ownerId", owner.getId()).getSingleResult();
         service.update(owner.getId(), isApproved, booking.getId());
-        List<BookingResponseDto> bookings = service.findByStateUser(booker.getId(), state);
+        List<BookingResponseDto> bookings = service.findByStateOwner(owner.getId(), state);
 
         assertThat(bookings, hasSize(1));
         assertThat(bookings.get(0).getId(), notNullValue());
