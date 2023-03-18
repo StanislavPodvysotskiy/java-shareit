@@ -10,7 +10,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface EndAfterStart {
 
-    String message() default "{End can not be before NOW}";
+    String message() default "{End can not be before Start}";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

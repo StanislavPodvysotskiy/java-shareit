@@ -20,11 +20,9 @@ import ru.practicum.shareit.user.dao.UserRepository;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.groupingBy;
 import static org.springframework.data.domain.Sort.Direction.DESC;
 
 @Service
@@ -54,11 +52,10 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     public List<ItemRequestResponseDto> setItems(List<ItemRequestResponseDto> requestsDto) {
-        Map<Integer, List<Item>> items = itemRepository.findAllWhereRequestIdNotNull()
-                .stream().collect(groupingBy(Item::getRequestId));
         for (ItemRequestResponseDto itemRequestDto : requestsDto) {
-            if (items.containsKey(itemRequestDto.getId())) {
-                itemRequestDto.setItems(ItemMapper.makeListItemDto(items.get(itemRequestDto.getId())));
+            List<Item> items = itemRepository.findByRequestId(itemRequestDto.getId());
+            if (items != null) {
+                itemRequestDto.setItems(ItemMapper.makeListItemDto(items));
             } else {
                 itemRequestDto.setItems(Collections.emptyList());
             }

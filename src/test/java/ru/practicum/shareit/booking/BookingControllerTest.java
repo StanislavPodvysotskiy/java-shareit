@@ -4,13 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.enums.State;
@@ -28,14 +27,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(BookingController.class)
+@AutoConfigureMockMvc
 public class BookingControllerTest {
 
-    @Mock
+    @MockBean
     private BookingService bookingService;
-    @InjectMocks
-    private BookingController controller;
+    private final BookingController controller = new BookingController(bookingService);
     private final ObjectMapper mapper = new ObjectMapper();
+    @Autowired
     private MockMvc mvc;
     private BookingDto bookingDto;
     private BookingResponseDto bookingResponseDto;
@@ -43,9 +43,6 @@ public class BookingControllerTest {
     @BeforeEach
     void setUp() {
         mapper.registerModule(new JavaTimeModule());
-        mvc = MockMvcBuilders
-                .standaloneSetup(controller)
-                .build();
         bookingResponseDto = new BookingResponseDto(1, "bookerName", 1, "itemName");
         bookingResponseDto.setId(1);
         bookingResponseDto.setStart(LocalDateTime.parse("2023-10-21T12:23:25"));
@@ -213,5 +210,82 @@ public class BookingControllerTest {
         String stateString = "APPROVED";
         State state = controller.getStateOrException(stateString);
         assertEquals(State.APPROVED, state);
+    }
+
+    @Test
+    public void findByBookerIdAllFromIsNegative() throws Exception {
+        mvc.perform(get("/bookings")
+                        .header("X-Sharer-User-Id", 1)
+                        .param("state", "ALL")
+                        .param("from", String.valueOf(-1))
+                        .param("size", String.valueOf(10)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void findByBookerIdAllSizeZero() throws Exception {
+        mvc.perform(get("/bookings")
+                        .header("X-Sharer-User-Id", 1)
+                        .param("state", "ALL")
+                        .param("from", String.valueOf(0))
+                        .param("size", String.valueOf(0)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void findByOwnerIdAllFromIsNegative() throws Exception {
+        mvc.perform(get("/bookings/owner")
+                        .header("X-Sharer-User-Id", 1)
+                        .param("state", "ALL")
+                        .param("from", String.valueOf(-1))
+                        .param("size", String.valueOf(10)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void findByOwnerIdAllSizeZero() throws Exception {
+        mvc.perform(get("/bookings/owner")
+                        .header("X-Sharer-User-Id", 1)
+                        .param("state", "ALL")
+                        .param("from", String.valueOf(0))
+                        .param("size", String.valueOf(0)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void saveBookingWithItemIdNull() throws Exception {
+        bookingDto.setItemId(null);
+        mvc.perform(post("/bookings")
+                        .header("X-Sharer-User-Id", 1)
+                        .content(mapper.writeValueAsString(bookingDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void saveBookingWithStartBeforeNow() throws Exception {
+        bookingDto.setStart(LocalDateTime.now().minusSeconds(1));
+        mvc.perform(post("/bookings")
+                        .header("X-Sharer-User-Id", 1)
+                        .content(mapper.writeValueAsString(bookingDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void saveBookingWithEndBeforeStart() throws Exception {
+        bookingDto.setStart(LocalDateTime.now().plusDays(1));
+        bookingDto.setEnd(LocalDateTime.now());
+        mvc.perform(post("/bookings")
+                        .header("X-Sharer-User-Id", 1)
+                        .content(mapper.writeValueAsString(bookingDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 }

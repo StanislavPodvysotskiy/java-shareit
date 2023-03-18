@@ -3,13 +3,12 @@ package ru.practicum.shareit.item;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.practicum.shareit.booking.model.LastBooking;
 import ru.practicum.shareit.booking.model.NextBooking;
 import ru.practicum.shareit.item.dto.CommentResponseDto;
@@ -26,90 +25,87 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(ItemController.class)
+@AutoConfigureMockMvc
 public class ItemControllerTest {
 
-    @Mock
+    @MockBean
     private ItemService itemService;
-    @InjectMocks
-    private ItemController controller;
     private final ObjectMapper mapper = new ObjectMapper();
+    @Autowired
     private MockMvc mvc;
-    private ItemResponseDto itemtDto;
+    private ItemResponseDto itemDto;
 
     @BeforeEach
     void setUp() {
-        mvc = MockMvcBuilders
-                .standaloneSetup(controller)
-                .build();
-        itemtDto = new ItemResponseDto();
-        itemtDto.setId(1);
-        itemtDto.setName("name");
-        itemtDto.setDescription("description");
-        itemtDto.setAvailable(true);
-        itemtDto.setRequestId(1);
-        itemtDto.setLastBooking(new LastBooking(1, 1));
-        itemtDto.setNextBooking(new NextBooking(2,1));
-        itemtDto.setComments(Collections.emptyList());
+        itemDto = new ItemResponseDto();
+        itemDto.setId(1);
+        itemDto.setName("name");
+        itemDto.setDescription("description");
+        itemDto.setAvailable(true);
+        itemDto.setRequestId(1);
+        itemDto.setLastBooking(new LastBooking(1, 1));
+        itemDto.setNextBooking(new NextBooking(2,1));
+        itemDto.setComments(Collections.emptyList());
     }
 
     @Test
     public void save() throws Exception {
         when(itemService.save(any(), anyInt()))
-                .thenReturn(itemtDto);
+                .thenReturn(itemDto);
         mvc.perform(post("/items")
                         .header("X-Sharer-User-Id", 1)
-                        .content(mapper.writeValueAsString(itemtDto))
+                        .content(mapper.writeValueAsString(itemDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(itemtDto.getId())))
-                .andExpect(jsonPath("$.name", is(itemtDto.getName())))
-                .andExpect(jsonPath("$.description", is(itemtDto.getDescription())))
-                .andExpect(jsonPath("$.available", is(itemtDto.getAvailable())))
-                .andExpect(jsonPath("$.requestId", is(itemtDto.getRequestId())))
+                .andExpect(jsonPath("$.id", is(itemDto.getId())))
+                .andExpect(jsonPath("$.name", is(itemDto.getName())))
+                .andExpect(jsonPath("$.description", is(itemDto.getDescription())))
+                .andExpect(jsonPath("$.available", is(itemDto.getAvailable())))
+                .andExpect(jsonPath("$.requestId", is(itemDto.getRequestId())))
                 .andExpect(jsonPath("$.lastBooking", is(notNullValue())))
-                .andExpect(jsonPath("$.lastBooking.id", is(itemtDto.getLastBooking().getId())))
-                .andExpect(jsonPath("$.lastBooking.bookerId", is(itemtDto.getLastBooking().getBookerId())))
+                .andExpect(jsonPath("$.lastBooking.id", is(itemDto.getLastBooking().getId())))
+                .andExpect(jsonPath("$.lastBooking.bookerId", is(itemDto.getLastBooking().getBookerId())))
                 .andExpect(jsonPath("$.nextBooking", is(notNullValue())))
-                .andExpect(jsonPath("$.nextBooking.id", is(itemtDto.getNextBooking().getId())))
-                .andExpect(jsonPath("$.nextBooking.bookerId", is(itemtDto.getNextBooking().getBookerId())))
+                .andExpect(jsonPath("$.nextBooking.id", is(itemDto.getNextBooking().getId())))
+                .andExpect(jsonPath("$.nextBooking.bookerId", is(itemDto.getNextBooking().getBookerId())))
                 .andExpect(jsonPath("$.comments", hasSize(0)));
     }
 
     @Test
     public void update() throws Exception {
-        itemtDto.setName("updateName");
-        itemtDto.setDescription("updateDescription");
-        itemtDto.setAvailable(false);
+        itemDto.setName("updateName");
+        itemDto.setDescription("updateDescription");
+        itemDto.setAvailable(false);
         when(itemService.update(any(), anyInt(), anyInt()))
-                .thenReturn(itemtDto);
+                .thenReturn(itemDto);
         mvc.perform(patch("/items/1")
                         .header("X-Sharer-User-Id", 1)
-                        .content(mapper.writeValueAsString(itemtDto))
+                        .content(mapper.writeValueAsString(itemDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(itemtDto.getId())))
-                .andExpect(jsonPath("$.name", is(itemtDto.getName())))
-                .andExpect(jsonPath("$.description", is(itemtDto.getDescription())))
-                .andExpect(jsonPath("$.available", is(itemtDto.getAvailable())))
-                .andExpect(jsonPath("$.requestId", is(itemtDto.getRequestId())))
+                .andExpect(jsonPath("$.id", is(itemDto.getId())))
+                .andExpect(jsonPath("$.name", is(itemDto.getName())))
+                .andExpect(jsonPath("$.description", is(itemDto.getDescription())))
+                .andExpect(jsonPath("$.available", is(itemDto.getAvailable())))
+                .andExpect(jsonPath("$.requestId", is(itemDto.getRequestId())))
                 .andExpect(jsonPath("$.lastBooking", is(notNullValue())))
-                .andExpect(jsonPath("$.lastBooking.id", is(itemtDto.getLastBooking().getId())))
-                .andExpect(jsonPath("$.lastBooking.bookerId", is(itemtDto.getLastBooking().getBookerId())))
+                .andExpect(jsonPath("$.lastBooking.id", is(itemDto.getLastBooking().getId())))
+                .andExpect(jsonPath("$.lastBooking.bookerId", is(itemDto.getLastBooking().getBookerId())))
                 .andExpect(jsonPath("$.nextBooking", is(notNullValue())))
-                .andExpect(jsonPath("$.nextBooking.id", is(itemtDto.getNextBooking().getId())))
-                .andExpect(jsonPath("$.nextBooking.bookerId", is(itemtDto.getNextBooking().getBookerId())))
+                .andExpect(jsonPath("$.nextBooking.id", is(itemDto.getNextBooking().getId())))
+                .andExpect(jsonPath("$.nextBooking.bookerId", is(itemDto.getNextBooking().getBookerId())))
                 .andExpect(jsonPath("$.comments", hasSize(0)));
     }
 
     @Test
     public void getAll() throws Exception {
         when(itemService.getAll(anyInt(), anyInt(), anyInt()))
-                .thenReturn(List.of(itemtDto));
+                .thenReturn(List.of(itemDto));
 
         mvc.perform(get("/items")
                         .header("X-Sharer-User-Id", 1)
@@ -117,46 +113,46 @@ public class ItemControllerTest {
                         .param("size", String.valueOf(10)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id", is(itemtDto.getId())))
-                .andExpect(jsonPath("$[0].name", is(itemtDto.getName())))
-                .andExpect(jsonPath("$[0].description", is(itemtDto.getDescription())))
-                .andExpect(jsonPath("$[0].available", is(itemtDto.getAvailable())))
-                .andExpect(jsonPath("$[0].requestId", is(itemtDto.getRequestId())))
+                .andExpect(jsonPath("$[0].id", is(itemDto.getId())))
+                .andExpect(jsonPath("$[0].name", is(itemDto.getName())))
+                .andExpect(jsonPath("$[0].description", is(itemDto.getDescription())))
+                .andExpect(jsonPath("$[0].available", is(itemDto.getAvailable())))
+                .andExpect(jsonPath("$[0].requestId", is(itemDto.getRequestId())))
                 .andExpect(jsonPath("$[0].lastBooking", is(notNullValue())))
-                .andExpect(jsonPath("$[0].lastBooking.id", is(itemtDto.getLastBooking().getId())))
-                .andExpect(jsonPath("$[0].lastBooking.bookerId", is(itemtDto.getLastBooking().getBookerId())))
+                .andExpect(jsonPath("$[0].lastBooking.id", is(itemDto.getLastBooking().getId())))
+                .andExpect(jsonPath("$[0].lastBooking.bookerId", is(itemDto.getLastBooking().getBookerId())))
                 .andExpect(jsonPath("$[0].nextBooking", is(notNullValue())))
-                .andExpect(jsonPath("$[0].nextBooking.id", is(itemtDto.getNextBooking().getId())))
-                .andExpect(jsonPath("$[0].nextBooking.bookerId", is(itemtDto.getNextBooking().getBookerId())))
+                .andExpect(jsonPath("$[0].nextBooking.id", is(itemDto.getNextBooking().getId())))
+                .andExpect(jsonPath("$[0].nextBooking.bookerId", is(itemDto.getNextBooking().getBookerId())))
                 .andExpect(jsonPath("$[0].comments", hasSize(0)));
     }
 
     @Test
     public void getById() throws Exception {
         when(itemService.getById(anyInt(), anyInt()))
-                .thenReturn(itemtDto);
+                .thenReturn(itemDto);
 
         mvc.perform(get("/items/1")
                         .header("X-Sharer-User-Id", 1))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(itemtDto.getId())))
-                .andExpect(jsonPath("$.name", is(itemtDto.getName())))
-                .andExpect(jsonPath("$.description", is(itemtDto.getDescription())))
-                .andExpect(jsonPath("$.available", is(itemtDto.getAvailable())))
-                .andExpect(jsonPath("$.requestId", is(itemtDto.getRequestId())))
+                .andExpect(jsonPath("$.id", is(itemDto.getId())))
+                .andExpect(jsonPath("$.name", is(itemDto.getName())))
+                .andExpect(jsonPath("$.description", is(itemDto.getDescription())))
+                .andExpect(jsonPath("$.available", is(itemDto.getAvailable())))
+                .andExpect(jsonPath("$.requestId", is(itemDto.getRequestId())))
                 .andExpect(jsonPath("$.lastBooking", is(notNullValue())))
-                .andExpect(jsonPath("$.lastBooking.id", is(itemtDto.getLastBooking().getId())))
-                .andExpect(jsonPath("$.lastBooking.bookerId", is(itemtDto.getLastBooking().getBookerId())))
+                .andExpect(jsonPath("$.lastBooking.id", is(itemDto.getLastBooking().getId())))
+                .andExpect(jsonPath("$.lastBooking.bookerId", is(itemDto.getLastBooking().getBookerId())))
                 .andExpect(jsonPath("$.nextBooking", is(notNullValue())))
-                .andExpect(jsonPath("$.nextBooking.id", is(itemtDto.getNextBooking().getId())))
-                .andExpect(jsonPath("$.nextBooking.bookerId", is(itemtDto.getNextBooking().getBookerId())))
+                .andExpect(jsonPath("$.nextBooking.id", is(itemDto.getNextBooking().getId())))
+                .andExpect(jsonPath("$.nextBooking.bookerId", is(itemDto.getNextBooking().getBookerId())))
                 .andExpect(jsonPath("$.comments", hasSize(0)));
     }
 
     @Test
     public void search() throws Exception {
         when(itemService.search(anyString(), anyInt(), anyInt()))
-                .thenReturn(List.of(itemtDto));
+                .thenReturn(List.of(itemDto));
 
         mvc.perform(get("/items/search")
                         .param("text", "text")
@@ -164,17 +160,17 @@ public class ItemControllerTest {
                         .param("size", String.valueOf(10)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id", is(itemtDto.getId())))
-                .andExpect(jsonPath("$[0].name", is(itemtDto.getName())))
-                .andExpect(jsonPath("$[0].description", is(itemtDto.getDescription())))
-                .andExpect(jsonPath("$[0].available", is(itemtDto.getAvailable())))
-                .andExpect(jsonPath("$[0].requestId", is(itemtDto.getRequestId())))
+                .andExpect(jsonPath("$[0].id", is(itemDto.getId())))
+                .andExpect(jsonPath("$[0].name", is(itemDto.getName())))
+                .andExpect(jsonPath("$[0].description", is(itemDto.getDescription())))
+                .andExpect(jsonPath("$[0].available", is(itemDto.getAvailable())))
+                .andExpect(jsonPath("$[0].requestId", is(itemDto.getRequestId())))
                 .andExpect(jsonPath("$[0].lastBooking", is(notNullValue())))
-                .andExpect(jsonPath("$[0].lastBooking.id", is(itemtDto.getLastBooking().getId())))
-                .andExpect(jsonPath("$[0].lastBooking.bookerId", is(itemtDto.getLastBooking().getBookerId())))
+                .andExpect(jsonPath("$[0].lastBooking.id", is(itemDto.getLastBooking().getId())))
+                .andExpect(jsonPath("$[0].lastBooking.bookerId", is(itemDto.getLastBooking().getBookerId())))
                 .andExpect(jsonPath("$[0].nextBooking", is(notNullValue())))
-                .andExpect(jsonPath("$[0].nextBooking.id", is(itemtDto.getNextBooking().getId())))
-                .andExpect(jsonPath("$[0].nextBooking.bookerId", is(itemtDto.getNextBooking().getBookerId())))
+                .andExpect(jsonPath("$[0].nextBooking.id", is(itemDto.getNextBooking().getId())))
+                .andExpect(jsonPath("$[0].nextBooking.bookerId", is(itemDto.getNextBooking().getBookerId())))
                 .andExpect(jsonPath("$[0].comments", hasSize(0)));
     }
 
@@ -196,5 +192,74 @@ public class ItemControllerTest {
                 .andExpect(jsonPath("$.id", is(commentDto.getId())))
                 .andExpect(jsonPath("$.text", is(commentDto.getText())))
                 .andExpect(jsonPath("$.authorName", is(commentDto.getAuthorName())));
+    }
+
+    @Test
+    public void getAllFromIsNegative() throws Exception {
+        mvc.perform(get("/items")
+                        .header("X-Sharer-User-Id", 1)
+                        .param("from", String.valueOf(-1))
+                        .param("size", String.valueOf(10)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void getAllSizeIsZero() throws Exception {
+        mvc.perform(get("/items")
+                        .header("X-Sharer-User-Id", 1)
+                        .param("from", String.valueOf(0))
+                        .param("size", String.valueOf(0)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void saveItemNameIsBlank() throws Exception {
+        itemDto.setName(" ");
+        mvc.perform(post("/items")
+                        .header("X-Sharer-User-Id", 1)
+                        .content(mapper.writeValueAsString(itemDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void saveItemDescriptionIsBlank() throws Exception {
+        itemDto.setDescription(" ");
+        mvc.perform(post("/items")
+                        .header("X-Sharer-User-Id", 1)
+                        .content(mapper.writeValueAsString(itemDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void saveItemAvailableIsBlank() throws Exception {
+        itemDto.setAvailable(null);
+        mvc.perform(post("/items")
+                        .header("X-Sharer-User-Id", 1)
+                        .content(mapper.writeValueAsString(itemDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void saveCommentTextIsBlank() throws Exception {
+        CommentResponseDto commentDto = new CommentResponseDto();
+        commentDto.setText(" ");
+        when(itemService.saveComment(any(), anyInt(), anyInt()))
+                .thenReturn(commentDto);
+        mvc.perform(post("/items/1/comment")
+                        .header("X-Sharer-User-Id", 1)
+                        .content(mapper.writeValueAsString(commentDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 }
