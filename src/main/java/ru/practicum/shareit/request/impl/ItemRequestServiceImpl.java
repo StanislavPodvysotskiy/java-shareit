@@ -20,9 +20,11 @@ import ru.practicum.shareit.user.dao.UserRepository;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.groupingBy;
 import static org.springframework.data.domain.Sort.Direction.DESC;
 
 @Service
@@ -38,7 +40,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         getUserOrException(userId);
         List<ItemRequestResponseDto> requestsDto = ItemRequestMapper.makeItemRequestDtoList(itemRequestRepository
                 .findByRequesterId(userId, Sort.by(DESC, "created")));
-        return setItems(requestsDto);
+        return setItemsForAllOwn(requestsDto, userId);
     }
 
     @Override
@@ -48,14 +50,28 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                 itemRequestRepository.findAll(PageRequest.of(from / size, size, Sort.by(DESC, "created")))
                         .stream().filter(itemRequest -> !itemRequest.getRequesterId().equals(userId))
                         .collect(Collectors.toList()));
-        return setItems(requestsDto);
+        return setItemsForAll(requestsDto, userId);
     }
 
-    public List<ItemRequestResponseDto> setItems(List<ItemRequestResponseDto> requestsDto) {
+    public List<ItemRequestResponseDto> setItemsForAllOwn(List<ItemRequestResponseDto> requestsDto, Integer userId) {
+        Map<Integer, List<Item>> items = itemRepository.findAllByRequesterId(userId)
+                .stream().collect(groupingBy(item -> item.getItemRequest().getId()));
         for (ItemRequestResponseDto itemRequestDto : requestsDto) {
-            List<Item> items = itemRepository.findByRequestId(itemRequestDto.getId());
-            if (items != null) {
-                itemRequestDto.setItems(ItemMapper.makeListItemDto(items));
+            if (items.containsKey(itemRequestDto.getId())) {
+                itemRequestDto.setItems(ItemMapper.makeListItemDto(items.get(itemRequestDto.getId())));
+            } else {
+                itemRequestDto.setItems(Collections.emptyList());
+            }
+        }
+        return requestsDto;
+    }
+
+    public List<ItemRequestResponseDto> setItemsForAll(List<ItemRequestResponseDto> requestsDto, Integer userId) {
+        Map<Integer, List<Item>> items = itemRepository.findAllNotEqualRequesterId(userId)
+                .stream().collect(groupingBy(item -> item.getItemRequest().getId()));
+        for (ItemRequestResponseDto itemRequestDto : requestsDto) {
+            if (items.containsKey(itemRequestDto.getId())) {
+                itemRequestDto.setItems(ItemMapper.makeListItemDto(items.get(itemRequestDto.getId())));
             } else {
                 itemRequestDto.setItems(Collections.emptyList());
             }

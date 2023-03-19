@@ -8,6 +8,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.PageRequest;
 import ru.practicum.shareit.item.dao.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.dao.ItemRequestRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.dao.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
@@ -25,6 +27,8 @@ public class ItemRepositoryTest {
     private ItemRepository itemRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ItemRequestRepository itemRequestRepository;
 
     private User user;
     private Item item;
@@ -36,12 +40,17 @@ public class ItemRepositoryTest {
         user.setEmail("user@mail.ru");
         userRepository.save(user);
 
+        ItemRequest itemRequest = new ItemRequest();
+        itemRequest.setDescription("description");
+        itemRequest.setRequesterId(user.getId());
+        itemRequestRepository.save(itemRequest);
+
         item = new Item();
         item.setName("itemName");
         item.setDescription("description");
         item.setAvailable(true);
         item.setOwner(user);
-        item.setRequestId(1);
+        item.setItemRequest(itemRequest);
         itemRepository.save(item);
     }
 
@@ -74,7 +83,7 @@ public class ItemRepositoryTest {
 
     @Test
     public void findByRequestId() {
-        List<Item> items = itemRepository.findByRequestId(item.getRequestId());
+        List<Item> items = itemRepository.findByRequestId(item.getItemRequest().getId());
         assertEquals(1, items.size());
         assertNotNull(items.get(0).getId());
         assertEquals("itemName", items.get(0).getName());
@@ -84,8 +93,19 @@ public class ItemRepositoryTest {
     }
 
     @Test
-    public void findAllWhereRequestIdNotNull() {
-        List<Item> items = itemRepository.findAllWhereRequestIdNotNull();
+    public void findAllByRequesterId() {
+        List<Item> items = itemRepository.findAllByRequesterId(user.getId());
+        assertEquals(1, items.size());
+        assertNotNull(items.get(0).getId());
+        assertEquals("itemName", items.get(0).getName());
+        assertEquals("description", items.get(0).getDescription());
+        assertEquals(true, items.get(0).getAvailable());
+        assertNotNull(items.get(0).getOwner().getId());
+    }
+
+    @Test
+    public void findAllNotEqualRequesterId() {
+        List<Item> items = itemRepository.findAllByRequesterId(user.getId());
         assertEquals(1, items.size());
         assertNotNull(items.get(0).getId());
         assertEquals("itemName", items.get(0).getName());

@@ -24,7 +24,6 @@ public class ItemMapperTest {
         assertEquals("name", item.getName());
         assertEquals("description", item.getDescription());
         assertEquals(true, item.getAvailable());
-        assertEquals(2, item.getRequestId());
     }
 
     @Test
@@ -34,13 +33,11 @@ public class ItemMapperTest {
         item.setName("name");
         item.setDescription("description");
         item.setAvailable(true);
-        item.setRequestId(2);
         ItemResponseDto itemDto = ItemMapper.makeItemDto(item);
         assertEquals(1, itemDto.getId());
         assertEquals("name", itemDto.getName());
         assertEquals("description", itemDto.getDescription());
         assertEquals(true, itemDto.getAvailable());
-        assertEquals(2, itemDto.getRequestId());
     }
 
     @Test
@@ -50,7 +47,6 @@ public class ItemMapperTest {
         item.setName("name");
         item.setDescription("description");
         item.setAvailable(true);
-        item.setRequestId(2);
         List<Item> items = new ArrayList<>();
         items.add(item);
         List<ItemResponseDto> itemsDto = ItemMapper.makeListItemDto(items);
@@ -59,6 +55,5 @@ public class ItemMapperTest {
         assertEquals("name", itemsDto.get(0).getName());
         assertEquals("description", itemsDto.get(0).getDescription());
         assertEquals(true, itemsDto.get(0).getAvailable());
-        assertEquals(2, itemsDto.get(0).getRequestId());
     }
 }

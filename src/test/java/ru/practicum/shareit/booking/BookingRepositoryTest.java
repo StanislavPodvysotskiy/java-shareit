@@ -60,7 +60,6 @@ public class BookingRepositoryTest {
             item.setDescription("description");
             item.setAvailable(true);
             item.setOwner(user);
-            item.setRequestId(1);
             itemRepository.save(item);
         }
 

@@ -22,7 +22,9 @@ create table if not exists ITEMS
     IS_AVAILABLE BOOLEAN NOT NULL,
     REQUEST_ID INTEGER,
     constraint ITEMS_USER_ID_FK
-        foreign key (OWNER_ID) references USERS (ID)
+        foreign key (OWNER_ID) references USERS (ID),
+    constraint ITEMS_REQUEST_ID_FK
+        foreign key (REQUEST_ID) references REQUESTS (ID)
 );
 
 create table if not exists BOOKINGS

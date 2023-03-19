@@ -19,7 +19,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +38,7 @@ public class ItemRequestServiceImplTest {
     private final ItemRequestServiceImpl service;
     private final UserService userService;
     private final ItemService itemService;
+    private final ItemRequestService itemRequestService;
 
     @Test
     public void save() {
@@ -85,7 +85,7 @@ public class ItemRequestServiceImplTest {
 
     @Test
     public void findAllOwn() {
-        User user = addUser("name4", "email4@email.ru");
+        User user = addUser("name3", "email3@email.ru");
         List<ItemRequestDto> sourceRequests = List.of(
                 makeItemRequestDto("description 1"),
                 makeItemRequestDto("description 2"),
@@ -124,7 +124,7 @@ public class ItemRequestServiceImplTest {
     }
 
     @Test
-    public void setItems() {
+    public void setItemsForAllOwn() {
         User user = addUser("userName", "useer@mail.ru");
         ItemDto itemDto = new ItemDto();
         itemDto.setName("itemName");
@@ -135,13 +135,47 @@ public class ItemRequestServiceImplTest {
         TypedQuery<Item> query = em.createQuery("select i from Item i " +
                 "where i.owner.id = :ownerId", Item.class);
         Item item = query.setParameter("ownerId", user.getId()).getSingleResult();
-        ItemRequestResponseDto itemRequestResponseDto = new ItemRequestResponseDto();
-        itemRequestResponseDto.setId(11);
-        itemRequestResponseDto.setDescription("description");
-        itemRequestResponseDto.setCreated(LocalDateTime.now());
+        ItemRequestDto itemRequestDto = makeItemRequestDto("description");
+        itemRequestService.save(user.getId(), itemRequestDto);
+        TypedQuery<ItemRequest> query2 = em.createQuery("select ir from ItemRequest ir " +
+                "where ir.description = :description", ItemRequest.class);
+        ItemRequest itemRequest = query2.setParameter("description", itemRequestDto.getDescription())
+                .getSingleResult();
+        item.setItemRequest(itemRequest);
+        ItemRequestResponseDto itemRequestResponseDto = ItemRequestMapper.makeItemRequestDto(itemRequest);
         List<ItemRequestResponseDto> itemsRequestsDto = new ArrayList<>();
         itemsRequestsDto.add(itemRequestResponseDto);
-        List<ItemRequestResponseDto> addItem = service.setItems(itemsRequestsDto);
+        List<ItemRequestResponseDto> addItem = service.setItemsForAllOwn(itemsRequestsDto, user.getId());
+        assertThat(addItem, hasSize(1));
+        assertThat(addItem.get(0).getId(), notNullValue());
+        assertThat(addItem.get(0).getDescription(), equalTo(itemRequestResponseDto.getDescription()));
+        assertThat(addItem.get(0).getItems(), hasSize(1));
+    }
+
+    @Test
+    public void setItemsForAll() {
+        User user1 = addUser("userName1", "useer1@mail.ru");
+        User user2 = addUser("userName2", "useer2@mail.ru");
+        ItemDto itemDto = new ItemDto();
+        itemDto.setName("itemName");
+        itemDto.setDescription("description");
+        itemDto.setAvailable(true);
+        itemDto.setRequestId(11);
+        itemService.save(itemDto, user1.getId());
+        TypedQuery<Item> query1 = em.createQuery("select i from Item i " +
+                "where i.owner.id = :ownerId", Item.class);
+        Item item = query1.setParameter("ownerId", user1.getId()).getSingleResult();
+        ItemRequestDto itemRequestDto = makeItemRequestDto("description1");
+        itemRequestService.save(user1.getId(), itemRequestDto);
+        TypedQuery<ItemRequest> query2 = em.createQuery("select ir from ItemRequest ir " +
+                "where ir.description = :description", ItemRequest.class);
+        ItemRequest itemRequest = query2.setParameter("description", itemRequestDto.getDescription())
+                .getSingleResult();
+        item.setItemRequest(itemRequest);
+        ItemRequestResponseDto itemRequestResponseDto = ItemRequestMapper.makeItemRequestDto(itemRequest);
+        List<ItemRequestResponseDto> itemsRequestsDto = new ArrayList<>();
+        itemsRequestsDto.add(itemRequestResponseDto);
+        List<ItemRequestResponseDto> addItem = service.setItemsForAll(itemsRequestsDto, user2.getId());
         assertThat(addItem, hasSize(1));
         assertThat(addItem.get(0).getId(), notNullValue());
         assertThat(addItem.get(0).getDescription(), equalTo(itemRequestResponseDto.getDescription()));
