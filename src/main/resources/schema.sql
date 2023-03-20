@@ -5,6 +5,14 @@ create table if not exists USERS
     EMAIL VARCHAR(50) UNIQUE NOT NULL
 );
 
+create table if not exists REQUESTS
+(
+    ID INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    DESCRIPTION VARCHAR(255) NOT NULL,
+    REQUESTER_ID INTEGER NOT NULL,
+    CREATED TIMESTAMP NOT NULL
+);
+
 create table if not exists ITEMS
 (
     ID INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -12,8 +20,11 @@ create table if not exists ITEMS
     NAME VARCHAR(50) NOT NULL,
     DESCRIPTION VARCHAR(255) NOT NULL,
     IS_AVAILABLE BOOLEAN NOT NULL,
+    REQUEST_ID INTEGER,
     constraint ITEMS_USER_ID_FK
-        foreign key (OWNER_ID) references USERS (ID)
+        foreign key (OWNER_ID) references USERS (ID),
+    constraint ITEMS_REQUEST_ID_FK
+        foreign key (REQUEST_ID) references REQUESTS (ID)
 );
 
 create table if not exists BOOKINGS
@@ -28,13 +39,6 @@ create table if not exists BOOKINGS
         foreign key (BOOKER_ID) references USERS (ID),
     constraint BOOKINGS_OWNER_ID_FK
         foreign key (ITEM_ID) references ITEMS (ID)
-);
-
-create table if not exists REQUESTS
-(
-    ID INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    DESCRIPTION VARCHAR(255) NOT NULL,
-    REQUESTER_ID INTEGER NOT NULL
 );
 
 create table if not exists COMMENTS

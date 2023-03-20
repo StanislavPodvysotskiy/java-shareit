@@ -1,23 +1,26 @@
 package ru.practicum.shareit.item.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.dao.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.LastBooking;
-import ru.practicum.shareit.booking.model.NextBooking;
 import ru.practicum.shareit.exception.BookingDateTimeException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.*;
+import ru.practicum.shareit.item.dao.CommentRepository;
+import ru.practicum.shareit.item.dao.ItemRepository;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.request.dao.ItemRequestRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.user.dao.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
@@ -35,12 +38,13 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
-
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Override
-    public List<ItemResponseDto> getAll(Integer ownerId) {
-        List<ItemResponseDto> items = ItemMapper.makeListItemDto(itemRepository.findAllByOwnerId(ownerId));
+    public List<ItemResponseDto> getAll(Integer ownerId, Integer from, Integer size) {
+        List<ItemResponseDto> items = ItemMapper.makeListItemDto(itemRepository.findAllByOwnerId(
+                ownerId, PageRequest.of(from / size, size, Sort.by(ASC, "id"))).getContent());
         Map<Integer, List<Comment>> comments = commentRepository.findAll().stream()
                 .collect(groupingBy(comment -> comment.getItem().getId()));
         for (ItemResponseDto item : items) {
@@ -87,6 +91,10 @@ public class ItemServiceImpl implements ItemService {
         User user = getUserOrException(ownerId);
         Item item = ItemMapper.makeItem(itemDto);
         item.setOwner(user);
+        if (itemDto.getRequestId() != null) {
+            Optional<ItemRequest> itemRequest = itemRequestRepository.findById(itemDto.getRequestId());
+            itemRequest.ifPresent(item::setItemRequest);
+        }
         return ItemMapper.makeItemDto(itemRepository.save(item));
     }
 
@@ -126,13 +134,9 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemResponseDto> search(String text) {
-        return ItemMapper.makeListItemDto(itemRepository.search(text));
-    }
-
-    @Override
-    public void delete(Integer itemId) {
-        itemRepository.deleteById(itemId);
+    public List<ItemResponseDto> search(String text, Integer from, Integer size) {
+        return ItemMapper.makeListItemDto(itemRepository
+                .search(text, PageRequest.of(from / size, size)).getContent());
     }
 
     private Map<Integer, List<Booking>> getLastBookings(Integer userId) {
@@ -148,27 +152,13 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private void setLastBooking(ItemResponseDto itemDto, List<Booking> pastBooking) {
-        itemDto.setLastBooking(bookingToLastBooking(Objects.requireNonNull(pastBooking
+        itemDto.setLastBooking(LastBookingMapper.bookingToLastBooking(Objects.requireNonNull(pastBooking
                 .stream().findFirst().orElse(null))));
     }
 
     private void setNextBooking(ItemResponseDto itemDto, List<Booking> futureBooking) {
-        itemDto.setNextBooking(bookingToNexBooking(Objects.requireNonNull(futureBooking
+        itemDto.setNextBooking(NexBookingMapper.bookingToNexBooking(Objects.requireNonNull(futureBooking
                 .stream().findFirst().orElse(null))));
-    }
-
-    private LastBooking bookingToLastBooking(Booking booking) {
-        LastBooking lastBooking = new LastBooking();
-        lastBooking.setId(booking.getId());
-        lastBooking.setBookerId(booking.getBooker().getId());
-        return lastBooking;
-    }
-
-    private NextBooking bookingToNexBooking(Booking booking) {
-        NextBooking nextBooking = new NextBooking();
-        nextBooking.setId(booking.getId());
-        nextBooking.setBookerId(booking.getBooker().getId());
-        return nextBooking;
     }
 
     private User getUserOrException(Integer userId) {

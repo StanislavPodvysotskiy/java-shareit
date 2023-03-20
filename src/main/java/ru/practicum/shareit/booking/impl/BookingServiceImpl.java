@@ -1,10 +1,11 @@
 package ru.practicum.shareit.booking.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingMapper;
-import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.dao.BookingRepository;
 import ru.practicum.shareit.booking.BookingService;
 import ru.practicum.shareit.booking.enums.State;
 import ru.practicum.shareit.booking.enums.Status;
@@ -12,9 +13,9 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.*;
-import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.item.dao.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.dao.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
 import javax.transaction.Transactional;
@@ -32,17 +33,17 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
 
     @Override
-    public List<BookingResponseDto> findByBookerId(Integer userId) {
+    public List<BookingResponseDto> findByBookerId(Integer userId, Integer from, Integer size) {
         getUserOrException(userId);
-        return BookingMapper.makeListBookingDto(bookingRepository
-                .findByBookerId(userId, Sort.by(DESC, "end")));
+        return BookingMapper.makeListBookingDto(bookingRepository.findByBookerId(
+                userId, PageRequest.of(from / size, size, Sort.by(DESC, "end"))).getContent());
     }
 
     @Override
-    public List<BookingResponseDto> findByOwnerId(Integer ownerId) {
+    public List<BookingResponseDto> findByOwnerId(Integer ownerId, Integer from, Integer size) {
         getUserOrException(ownerId);
-        return BookingMapper.makeListBookingDto(bookingRepository
-                .findByOwnerId(ownerId, Sort.by(DESC, "end")));
+        return BookingMapper.makeListBookingDto(bookingRepository.findByOwnerId(
+                ownerId, PageRequest.of(from / size, size, Sort.by(DESC, "end"))).getContent());
     }
 
     @Override
@@ -126,9 +127,7 @@ public class BookingServiceImpl implements BookingService {
         if (!item.getAvailable()) {
             throw new ItemNotAvailableException("Item not available now");
         }
-        Booking booking = new Booking();
-        booking.setStart(bookingDto.getStart());
-        booking.setEnd(bookingDto.getEnd());
+        Booking booking = BookingMapper.makeBooking(bookingDto);
         booking.setBooker(booker);
         booking.setItem(item);
         booking.setStatus(Status.WAITING);

@@ -17,6 +17,7 @@ public class ItemResponseDto {
     private String name;
     private String description;
     private Boolean available;
+    private Integer requestId;
 
     private LastBooking lastBooking;
     private NextBooking nextBooking;

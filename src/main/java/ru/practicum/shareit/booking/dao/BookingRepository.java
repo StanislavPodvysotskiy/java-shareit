@@ -1,5 +1,7 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.booking.dao;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,10 +13,10 @@ import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
-    List<Booking> findByBookerId(Integer bookerId, Sort sort);
+    Page<Booking> findByBookerId(Integer bookerId, Pageable pageable);
 
     @Query("select b from Booking b where b.item.owner.id = ?1")
-    List<Booking> findByOwnerId(Integer ownerId, Sort sort);
+    Page<Booking> findByOwnerId(Integer ownerId, Pageable pageable);
 
     @Query("select b from Booking b where b.start < ?1 and b.end > ?1 and b.booker.id = ?2")
     List<Booking> findCurrentBookingUser(LocalDateTime localDateTime, Integer userId);
@@ -22,7 +24,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     @Query("select b from Booking b where b.start < ?1 and b.end > ?1 and b.item.owner.id = ?2")
     List<Booking> findCurrentBookingOwner(LocalDateTime localDateTime, Integer ownerId);
 
-    @Query("select b from Booking b where b.start <= ?1 and b.booker.id = ?2 and b.status = 'APPROVED'")
+    @Query("select b from Booking b where b.end <= ?1 and b.booker.id = ?2 and b.status = 'APPROVED'")
     List<Booking> findPastBookingUser(LocalDateTime localDateTime, Integer bookerId, Sort sort);
 
     @Query("select b from Booking b where b.start <= ?1 and b.item.id = ?2 and b.status = 'APPROVED'")
@@ -43,6 +45,6 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     List<Booking> findByStatusAndBookerId(Status status, Integer bookerId, Sort sort);
 
     @Query("select b from Booking b where b.status = ?1 and b.item.owner.id = ?2")
-    List<Booking> findByStatusAndOwnerId(Status status, Integer bookerId, Sort sort);
+    List<Booking> findByStatusAndOwnerId(Status status, Integer ownerId, Sort sort);
 
 }
