@@ -7,8 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dao.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.LastBooking;
-import ru.practicum.shareit.booking.model.NextBooking;
 import ru.practicum.shareit.exception.BookingDateTimeException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.*;
@@ -154,27 +152,13 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private void setLastBooking(ItemResponseDto itemDto, List<Booking> pastBooking) {
-        itemDto.setLastBooking(bookingToLastBooking(Objects.requireNonNull(pastBooking
+        itemDto.setLastBooking(LastBookingMapper.bookingToLastBooking(Objects.requireNonNull(pastBooking
                 .stream().findFirst().orElse(null))));
     }
 
     private void setNextBooking(ItemResponseDto itemDto, List<Booking> futureBooking) {
-        itemDto.setNextBooking(bookingToNexBooking(Objects.requireNonNull(futureBooking
+        itemDto.setNextBooking(NexBookingMapper.bookingToNexBooking(Objects.requireNonNull(futureBooking
                 .stream().findFirst().orElse(null))));
-    }
-
-    public LastBooking bookingToLastBooking(Booking booking) {
-        LastBooking lastBooking = new LastBooking();
-        lastBooking.setId(booking.getId());
-        lastBooking.setBookerId(booking.getBooker().getId());
-        return lastBooking;
-    }
-
-    public NextBooking bookingToNexBooking(Booking booking) {
-        NextBooking nextBooking = new NextBooking();
-        nextBooking.setId(booking.getId());
-        nextBooking.setBookerId(booking.getBooker().getId());
-        return nextBooking;
     }
 
     private User getUserOrException(Integer userId) {

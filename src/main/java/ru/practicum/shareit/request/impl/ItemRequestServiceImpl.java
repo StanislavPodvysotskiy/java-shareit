@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
 import static org.springframework.data.domain.Sort.Direction.DESC;
@@ -47,9 +46,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public List<ItemRequestResponseDto> findAll(Integer userId, Integer from, Integer size) {
         getUserOrException(userId);
         List<ItemRequestResponseDto> requestsDto = ItemRequestMapper.makeItemRequestDtoList(
-                itemRequestRepository.findAll(PageRequest.of(from / size, size, Sort.by(DESC, "created")))
-                        .stream().filter(itemRequest -> !itemRequest.getRequesterId().equals(userId))
-                        .collect(Collectors.toList()));
+                itemRequestRepository.findAllExceptUserId(userId,
+                        PageRequest.of(from / size, size, Sort.by(DESC, "created"))).getContent());
         return setItemsForAll(requestsDto, userId);
     }
 

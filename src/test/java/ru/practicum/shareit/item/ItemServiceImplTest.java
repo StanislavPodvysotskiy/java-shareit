@@ -7,8 +7,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.shareit.booking.BookingService;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.LastBooking;
-import ru.practicum.shareit.booking.model.NextBooking;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -143,28 +141,6 @@ public class ItemServiceImplTest {
         assertThat(commentResponseDto.getId(), notNullValue());
         assertThat(commentResponseDto.getText(), equalTo(commentDto.getText()));
         assertThat(commentResponseDto.getCreated(), notNullValue());
-    }
-
-    @Test
-    public void bookingToLastBooking() {
-        User booker = addUser("bookerName", "booker1@email.ru");
-        Booking booking = new Booking();
-        booking.setId(1);
-        booking.setBooker(booker);
-        LastBooking lastBooking = service.bookingToLastBooking(booking);
-        assertThat(lastBooking.getId(), equalTo(1));
-        assertThat(lastBooking.getBookerId(), equalTo(booker.getId()));
-    }
-
-    @Test
-    public void bookingToNexBooking() {
-        User booker = addUser("bookerName", "booker2@email.ru");
-        Booking booking = new Booking();
-        booking.setId(1);
-        booking.setBooker(booker);
-        NextBooking nextBooking = service.bookingToNexBooking(booking);
-        assertThat(nextBooking.getId(), equalTo(1));
-        assertThat(nextBooking.getBookerId(), equalTo(booker.getId()));
     }
 
     private ItemDto makeItemDto(String name, String description) {
