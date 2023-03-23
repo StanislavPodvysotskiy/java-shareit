@@ -9,8 +9,8 @@ services:
       - "6541:5432"
     environment:
       - POSTGRES_DB=shareit
-      - POSTGRES_USER=kitty
-      - POSTGRES_PASSWORD=kitty
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=qwerty
 
   server:
     build: server
@@ -20,8 +20,8 @@ services:
     depends_on:
       - db
     environment:
-      - POSTGRES_USER=kitty
-      - POSTGRES_PASSWORD=kitty
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=qwerty
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/shareit
 
   gateway:
