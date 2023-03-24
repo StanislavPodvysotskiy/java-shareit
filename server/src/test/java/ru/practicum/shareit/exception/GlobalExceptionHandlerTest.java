@@ -4,10 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import javax.validation.ConstraintViolationException;
-
-import java.util.Set;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class GlobalExceptionHandlerTest {
@@ -51,12 +47,6 @@ public class GlobalExceptionHandlerTest {
         ResponseEntity<String> re = geh.handleBadRequestException(new BookingException("test message"));
         assertEquals(HttpStatus.NOT_FOUND, re.getStatusCode());
         assertEquals("test message", re.getBody());
-    }
-
-    @Test
-    public void handleBadRequestExceptionConstraint() {
-        ResponseEntity<String> re = geh.handleBadRequestException(new ConstraintViolationException(Set.of()));
-        assertEquals(HttpStatus.BAD_REQUEST, re.getStatusCode());
     }
 
     @Test
